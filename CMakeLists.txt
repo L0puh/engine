@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 project(engine)
 
 cmake_policy(SET CMP0072 NEW)
+set(CMAKE_BUILD_TYPE Debug)
+
 find_package(OpenGL REQUIRED)
 
 include_directories(libs)

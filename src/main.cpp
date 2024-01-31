@@ -6,27 +6,6 @@
 const int WIDTH = 400;
 const int HEIGHT = 400;
 
-const char *v_shader_source = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-const char *f_shader_source = "#version 330 core\n"
-   "out vec4 FragColor;\n"
-   "void main()\n"
-   "{\n"
-   "  FragColor=vec4(1.0f, 0.2f, 0.2f, 1.0f);\n"
-   "}\0";
-
-const char *f_shader_source2 = "#version 330 core\n"
-   "out vec4 FragColor;\n"
-   "void main()\n"
-   "{\n"
-   "  FragColor=vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-   "}\0";
-
 int main(){
    GLFWwindow* win;
    if (!glfwInit()){
@@ -53,51 +32,25 @@ int main(){
 
    glfwSetFramebufferSizeCallback(win, frame_buffer_size);
 
-// SHADERS: 
-   uint vertex_shader;
-   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-   glShaderSource(vertex_shader, 1, &v_shader_source, NULL);
-   glCompileShader(vertex_shader);
+// SHADERS: (FIXME)
 
-   int res;
-   char info[512];
-   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &res);
-   if (!res){
-      glGetShaderInfoLog(vertex_shader, 512, NULL, info);
-      utils::log(info);
-   } else utils::log("complied vertex shader");
-
-
-   uint fragment_shader, fragment_shader2;
-   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragment_shader, 1, &f_shader_source, NULL);
-   glCompileShader(fragment_shader);
-
-   fragment_shader2 = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(fragment_shader2, 1, &f_shader_source2, NULL);
-   glCompileShader(fragment_shader2);
-
-   glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &res);
-   if (!res){
-      glGetShaderInfoLog(vertex_shader, 512, NULL, info);
-      utils::error(info);
-   } else utils::log("complied fragment shader");
-
-   uint shader_program, shader_program2;
+   uint shader_program, shader_program2; 
    shader_program = glCreateProgram();
-   glAttachShader(shader_program, vertex_shader);
-   glAttachShader(shader_program, fragment_shader);
+   Vertex_shader v_sh("../shaders/shader.vr"); 
+   v_sh.create_shader(shader_program);
+   Fragment_shader f_sh("../shaders/shader.fg");
+   f_sh.create_shader(shader_program);
    glLinkProgram(shader_program);
   
    shader_program2 = glCreateProgram();
-   glAttachShader(shader_program2, vertex_shader);
-   glAttachShader(shader_program2, fragment_shader2);
+   Fragment_shader f_sh2("../shaders/shader2.fg");
+   f_sh2.create_shader(shader_program2);
+   v_sh.create_shader(shader_program2);
    glLinkProgram(shader_program2);
-   glGetProgramiv(shader_program2, GL_LINK_STATUS, &res);
-   if (!res){
-      glGetProgramInfoLog(shader_program, 512, NULL, info);
-      utils::error(info);
-   } else utils::log("linked shader program");
+
+   check_status_shader_program(shader_program);
+   check_status_shader_program(shader_program2);
+
 
 // VERTICIES: 
    float vertices[] = {
@@ -199,8 +152,6 @@ int main(){
       glfwSwapBuffers(win);
       glClear(GL_COLOR_BUFFER_BIT);
    }
-   glDeleteShader(vertex_shader);
-   glDeleteShader(fragment_shader);
    glfwDestroyWindow(win);
    glfwTerminate();
 
