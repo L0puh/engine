@@ -32,24 +32,10 @@ int main(){
 
    glfwSetFramebufferSizeCallback(win, frame_buffer_size);
 
-// SHADERS: (FIXME)
+// SHADERS: 
 
-   uint shader_program, shader_program2; 
-   shader_program = glCreateProgram();
-   Vertex_shader v_sh("../shaders/shader.vr"); 
-   v_sh.create_shader(shader_program);
-   Fragment_shader f_sh("../shaders/shader.fg");
-   f_sh.create_shader(shader_program);
-   glLinkProgram(shader_program);
-  
-   shader_program2 = glCreateProgram();
-   Fragment_shader f_sh2("../shaders/shader2.fg");
-   f_sh2.create_shader(shader_program2);
-   v_sh.create_shader(shader_program2);
-   glLinkProgram(shader_program2);
-
-   check_status_shader_program(shader_program);
-   check_status_shader_program(shader_program2);
+   Shader s1("../shaders/shader.vert", "../shaders/shader.frag");
+   Shader s2("../shaders/shader.vert", "../shaders/shader2.frag");
 
 
 // VERTICIES: 
@@ -133,7 +119,7 @@ int main(){
 
       if (pressed) {
          //draw a triangle
-         glUseProgram(shader_program);
+         s1.use();
          glBindVertexArray(VAOs[0]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
          glBindVertexArray(VAOs[1]);
@@ -143,7 +129,7 @@ int main(){
 
       } else if (pressed2) {
          //draw a square
-         glUseProgram(shader_program2);
+         s2.use();
          glBindVertexArray(VAOs[2]);
          glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
          glBindVertexArray(0);
