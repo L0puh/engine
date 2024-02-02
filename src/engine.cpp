@@ -1,28 +1,10 @@
 #include "engine.h"
 #include "utils.h"
-#include <fstream>
-#include <sstream>
+#include <string>
 
 void frame_buffer_size(GLFWwindow* window, int width, int height){
    glViewport(0, 0, width, height);
    utils::log("changed view port");
-}
-
-static std::string get_source_from_file(const char filename[]){
-   std::string source;
-   std::ifstream file;
-   file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-   try {
-      file.open(filename);
-      std::stringstream stream_file; 
-      stream_file << file.rdbuf();
-      file.close();
-      source = stream_file.str();
-   }
-   catch(std::ifstream::failure e){
-      utils::error("cant' open the file", filename);
-   }
-   return source;
 }
 
 void check_status_shader_program(uint shader_program){
@@ -32,7 +14,7 @@ void check_status_shader_program(uint shader_program){
    if (!res){
       glGetProgramInfoLog(shader_program, 512, NULL, info);
       utils::error("shaders", info);
-   } else utils::log("linked shader program");
+   } else utils::log("linked shader program", std::to_string(shader_program));
 }
 
 
@@ -53,13 +35,20 @@ Shader::Shader(const char src_vertex[], const char src_fragment[]){
    glDeleteShader(vertex);
    glDeleteShader(fragment);
 }
+
 Shader::~Shader(){
    glDeleteProgram(ID);
+   utils::log("deleted shader", std::to_string(ID));
 }
+
+void Shader::use(){
+   glUseProgram(ID);
+}
+
 void Shader::create_shader(uint* shader, const char src[], GLuint type){
    int res; char info[512];
    *shader = glCreateShader(type); 
-   std::string shader_code= get_source_from_file(src);
+   std::string shader_code= utils::get_source_from_file(src);
    const char* source = shader_code.c_str();
    glShaderSource(*shader, 1, &source, NULL); 
    glCompileShader(*shader);
@@ -67,11 +56,7 @@ void Shader::create_shader(uint* shader, const char src[], GLuint type){
    if (!res) {
       glGetShaderInfoLog(*shader, 512, NULL, info);;
       utils::error(src, info);
-   } else utils::log(src);
-}
-
-void Shader::use(){
-   glUseProgram(ID);
+   } else utils::log(src, "created shader");
 }
 
 
