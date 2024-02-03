@@ -30,6 +30,7 @@ class Shader {
       void use();
 
       void set_float(std::string &name, float x);
+      void set_int(std::string &name, int x);
    private:
       void create_shader(uint* shader, const char src[], GLuint type);
 };
@@ -40,6 +41,7 @@ class Texture {
       ~Texture();
    public:
       uint ID;
+      void use(uint ID2);
       void use();
 };
 

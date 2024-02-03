@@ -43,6 +43,7 @@ int main(){
 // TEXTURES:
 
    Texture tx("../textures/wall.jpg");
+   Texture tx2("../textures/face.png");
 
 // VERTICIES: 
 
@@ -54,10 +55,10 @@ int main(){
    };
 
    float vertices3[] = {
-      // x   y     z    texture
-     -0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 
-     -0.0f, -0.5f, 0.0f, -1.0f, -1.0f,
-     -0.5f,  0.5f, 0.0f, -0.5f, 1.0f
+      // x   y     z          texture
+        0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   
+        0.5f, -0.5f, 0.0f,   1.0f, -1.0f,    // FIXME
+        -0.5f, -0.5f, 0.0f,  -1.0f, -1.0f,   
    };
    float vertices2[] = {
      // x   y     z        R     G    B
@@ -92,11 +93,11 @@ int main(){
    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
    //position
-   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-   glEnableVertexAttribArray(2);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+   glEnableVertexAttribArray(0);
    //color 
-   glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
-   glEnableVertexAttribArray(3);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+   glEnableVertexAttribArray(1);
 
    //TRIANGLE 2
    glBindVertexArray(VAOs[1]);
@@ -117,11 +118,11 @@ int main(){
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[0]);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) , indices, GL_STATIC_DRAW);
    // pos
-   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-   glEnableVertexAttribArray(2);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+   glEnableVertexAttribArray(0);
    //color 
-   glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
-   glEnableVertexAttribArray(3);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+   glEnableVertexAttribArray(1);
 
    utils::log("setup openGl");
 
@@ -129,6 +130,12 @@ int main(){
    bool triangle_pressed = false, cube_pressed = true;
    float move = 0;
    std::string name = "move";
+
+   std::string tx_name = "my_texture", tx_name2 = "my_texture2";
+   s3.use();
+   s3.set_int(tx_name, 0);
+   s3.set_int(tx_name2, 1);
+  
 
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
@@ -143,16 +150,17 @@ int main(){
       }
       if (triangle_pressed) {
          //draw triangles
-         tx.use();
+         tx.use(tx2.ID);
+         
          s3.use();
          glBindVertexArray(VAOs[1]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
          glBindVertexArray(0);
          
-         s2.set_float(name, move);
-         s2.use();
-         glBindVertexArray(VAOs[0]);
-         glDrawArrays(GL_TRIANGLES, 0, 3);
+         /* s2.set_float(name, move); */
+         /* s2.use(); */
+         /* glBindVertexArray(VAOs[0]); */
+         /* glDrawArrays(GL_TRIANGLES, 0, 3); */
 
       } else if (cube_pressed) {
          //draw a cube 

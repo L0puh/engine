@@ -76,6 +76,11 @@ void Shader::set_float(std::string &name, float x){
    glUniform1f(location, x); 
 
 }
+void Shader::set_int(std::string &name, int x){
+   int location = glGetUniformLocation(ID, name.c_str());
+   assert(location != -1);
+   glUniform1i(location, x); 
+}
 
 
 /******************************************************/
@@ -88,25 +93,38 @@ Texture::Texture(const char texture_path[]){
 
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
    int width, height, color_channels;
    unsigned char *data = stbi_load(texture_path, &width, &height, &color_channels, 0);
-   assert(data);
+   if (!data){ 
+      utils::error(texture_path, "couldn't load data");
+      assert(data);
+   }
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
    glGenerateMipmap(GL_TEXTURE_2D);
    stbi_image_free(data);
+   utils::log(texture_path,"created texture");
 }
 
 Texture::~Texture(){
    glDeleteTextures(1, &ID);
+   utils::log("deleted texture", std::to_string(ID));
 }
 
+void Texture::use(uint ID2){
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, ID);
+
+   glActiveTexture(GL_TEXTURE1);
+   glBindTexture(GL_TEXTURE_2D, ID2);
+   
+}
 void Texture::use(){
    glBindTexture(GL_TEXTURE_2D, ID);
 }
-
 
 /******************************************************/
 //                    INPUT                           //
@@ -124,19 +142,6 @@ void Input::get_input(GLFWwindow* window, int key, int scancode, int action, int
       case GLFW_KEY_F:
          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          break;
-
    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
