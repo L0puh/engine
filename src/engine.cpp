@@ -1,13 +1,10 @@
 #include "engine.h"
 #include "utils.h"
 #include <cassert>
-#include <cmath>
 #include <string>
 
-void frame_buffer_size(GLFWwindow* window, int width, int height){
-   glViewport(0, 0, width, height);
-   utils::log("changed view port");
-}
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 void check_status_shader_program(uint shader_program){
    int res; 
@@ -19,6 +16,11 @@ void check_status_shader_program(uint shader_program){
    } else utils::log("linked shader program", std::to_string(shader_program));
 }
 
+
+void frame_buffer_size(GLFWwindow* window, int width, int height){
+   glViewport(0, 0, width, height);
+   utils::log("changed view port");
+}
 
 /******************************************************/
 //                    SHADER                          //
@@ -67,3 +69,74 @@ void Shader::use(fvec4 color){
 void Shader::use(){
    glUseProgram(ID);
 }
+
+void Shader::set_float(std::string &name, float x){
+   int location = glGetUniformLocation(ID, name.c_str());
+   assert(location != -1);
+   glUniform1f(location, x); 
+
+}
+
+
+/******************************************************/
+//                    TEXTURE                         //
+/******************************************************/
+
+Texture::Texture(const char texture_path[]){
+   glGenTextures(1, &ID);
+   glBindTexture(GL_TEXTURE_2D, ID);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+   int width, height, color_channels;
+   unsigned char *data = stbi_load(texture_path, &width, &height, &color_channels, 0);
+   assert(data);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+   glGenerateMipmap(GL_TEXTURE_2D);
+   stbi_image_free(data);
+}
+
+Texture::~Texture(){
+   glDeleteTextures(1, &ID);
+}
+
+void Texture::use(){
+   glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+
+/******************************************************/
+//                    INPUT                           //
+/******************************************************/
+
+void Input::get_input(GLFWwindow* window, int key, int scancode, int action, int mods){
+   switch(key){
+      case GLFW_KEY_ESCAPE:
+         glfwSetWindowShouldClose(window, true);
+         utils::log("close the program");
+         break;
+      case GLFW_KEY_P:
+         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+         break;
+      case GLFW_KEY_F:
+         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+         break;
+
+   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
