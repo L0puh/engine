@@ -4,9 +4,17 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <sys/types.h>
+#define LEN(x) sizeof(x)/sizeof(x[0])
 
 void frame_buffer_size(GLFWwindow* window, int width, int height);
 void check_status_shader_program(uint shader_program);
+
+struct fvec4{
+   float r;
+   float g;
+   float b;
+   float apacity;
+};
 
 class Shader {
    public:
@@ -15,6 +23,7 @@ class Shader {
 
    public:
       uint ID;
+      void use(fvec4 color);
       void use();
 
    private:

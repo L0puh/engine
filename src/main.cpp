@@ -3,9 +3,8 @@
 #include "engine.h"
 #include "utils.h"
 
-#define LEN(x) sizeof(x)/sizeof(x[0])
-const int WIDTH = 400;
-const int HEIGHT = 400;
+const int WIDTH = 300;
+const int HEIGHT = 300;
 
 
 int main(){
@@ -36,29 +35,29 @@ int main(){
 
 // SHADERS: 
 
-   Shader s1("../shaders/shader.vert", "../shaders/shader.frag");
-   Shader s2("../shaders/shader.vert", "../shaders/shader2.frag");
-
+   Shader s1("../shaders/shader.vert", "../shaders/shader.frag");  // with uniform
+   Shader s2("../shaders/shader.vert", "../shaders/shader2.frag"); 
 
 // VERTICIES: 
    float vertices[] = {
-      0.0f, -0.5f, 0.0f,  // left
-      0.9f, -0.5f, 0.0f,  // right
-      0.45f, 0.5f, 0.0f   // top
+   //  x     y       z    colors 
+      0.0f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // bottom right
+      0.9f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // bottom left 
+      0.45f, 0.5f, 0.0f,  0.0f, 0.0f, 1.0f  // top
    };
    float vertices3[] = {
-     -0.9f, -0.5f, 0.0f,  // left
-     -0.0f, -0.5f, 0.0f,  // right
-     -0.45f, 0.5f, 0.0f,  // top
+     -0.9f, -0.5f, 0.0f,  
+     -0.0f, -0.5f, 0.0f, 
+     -0.45f, 0.5f, 0.0f,  
    };
    float vertices2[] = {
-      0.3f, -0.3f, 0.0f,   //0
-      0.0f, -0.6f, 0.0f,   //1
-      -0.6f, -0.6f, 0.0f,  //2
-      -0.3f, 0.3f, 0.0f,   //3
-      0.3f, 0.3f, 0.0f,    //4
-      -0.6f, 0.0f, 0.0f,   //5
-      0.0f, 0.0f, 0.0f     //6
+      0.3f, -0.3f, 0.0f,  0.0f, 0.0f, 1.0f,  //0
+      0.0f, -0.6f, 0.0f,  0.0f, 0.0f, 1.0f,  //1
+      -0.6f, -0.6f, 0.0f, 0.0f, 0.0f, 1.0f,  //2
+      -0.3f, 0.3f, 0.0f,  1.0f, 0.0f, 0.0f,  //3
+      0.3f, 0.3f, 0.0f,   1.0f, 0.0f, 0.0f,  //4
+      -0.6f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  //5
+      0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,  //6
    };
 
    uint indices[] = {
@@ -66,12 +65,14 @@ int main(){
       5, 4, 6,
       5, 2, 1,
       5, 6, 1,
-      
-   };
-   uint indices2[] = {
       6, 1, 0,
       6, 4, 0
+      
    };
+   /* uint indices2[] = { */
+   /* }; */
+
+// BUFFERS: 
    uint VBOs[4], VAOs[4], EBOs[2];
    glGenVertexArrays(4, VAOs);
    glGenBuffers(4, VBOs);
@@ -81,8 +82,13 @@ int main(){
    glBindVertexArray(VAOs[0]);
    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+
+   //position
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
    glEnableVertexAttribArray(0);
+   //color 
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+   glEnableVertexAttribArray(1);
 
    //TRIANGLE 2
    glBindVertexArray(VAOs[1]);
@@ -98,17 +104,19 @@ int main(){
 
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[0]);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) , indices, GL_STATIC_DRAW);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
    glEnableVertexAttribArray(0);
 
-   glBindVertexArray(VAOs[3]);
-   glBindBuffer(GL_ARRAY_BUFFER, VBOs[3]);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+   glEnableVertexAttribArray(1);
+   /* glBindVertexArray(VAOs[3]); */
+   /* glBindBuffer(GL_ARRAY_BUFFER, VBOs[3]); */
+   /* glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW); */
 
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[1]);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2) , indices2, GL_STATIC_DRAW);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0); 
-   glEnableVertexAttribArray(0);
+   /* glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[1]); */
+   /* glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2) , indices2, GL_STATIC_DRAW); */
+   /* glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0); */
+   /* glEnableVertexAttribArray(0); */
 
    utils::log("setup openGl");
 
@@ -117,12 +125,10 @@ int main(){
 
    while(!glfwWindowShouldClose(win)){
       if (glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_PRESS){
-         utils::log("triangle");
          pressed = true;
          pressed2 = false;
       } 
       if (glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS){
-         utils::log("cude");
          pressed = false;
          pressed2 = true;
       }
@@ -137,27 +143,31 @@ int main(){
          } else {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             filled=true;
-            utils::log("fill");
          }
       }  
 
       if (pressed) {
          //draw a triangle
-         s1.use();
+         s2.use();
          glBindVertexArray(VAOs[0]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
+
+         s1.use({0.1f, 0.2f, 0.1f, 1.0f});
          glBindVertexArray(VAOs[1]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
-         glBindVertexArray(0);
 
+         s1.use({0.0f, 0.0f, 0.0f, 1.0f});
+         glDrawArrays(GL_LINES, 0, 3);
+         glBindVertexArray(0);
       } else if (pressed2) {
-         //draw a square
+         //draw a cube 
          s2.use();
          glBindVertexArray(VAOs[2]);
          glDrawElements(GL_TRIANGLES, LEN(indices), GL_UNSIGNED_INT, 0);
-         s1.use();
-         glBindVertexArray(VAOs[3]);
-         glDrawElements(GL_TRIANGLES, LEN(indices), GL_UNSIGNED_INT, 0);
+
+         s1.use({0.0f, 0.0f, 0.0f, 1.0f});
+         glDrawElements(GL_LINE_STRIP, LEN(indices), GL_UNSIGNED_INT, 0);
+
          glBindVertexArray(0);
       }
       glfwPollEvents();

@@ -1,5 +1,7 @@
 #include "engine.h"
 #include "utils.h"
+#include <cassert>
+#include <cmath>
 #include <string>
 
 void frame_buffer_size(GLFWwindow* window, int width, int height){
@@ -41,10 +43,6 @@ Shader::~Shader(){
    utils::log("deleted shader", std::to_string(ID));
 }
 
-void Shader::use(){
-   glUseProgram(ID);
-}
-
 void Shader::create_shader(uint* shader, const char src[], GLuint type){
    int res; char info[512];
    *shader = glCreateShader(type); 
@@ -59,5 +57,13 @@ void Shader::create_shader(uint* shader, const char src[], GLuint type){
    } else utils::log(src, "created shader");
 }
 
+void Shader::use(fvec4 color){
+   int location = glGetUniformLocation(ID, "color");
+   assert(location != -1);
+   glUseProgram(ID);
+   glUniform4f(location, color.r, color.g, color.b, color.apacity);
+}
 
-
+void Shader::use(){
+   glUseProgram(ID);
+}
