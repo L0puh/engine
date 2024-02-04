@@ -6,6 +6,37 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+/******************************************************/
+
+GLFWwindow* init_window(const int WIDTH, const int HEIGHT){
+   GLFWwindow* win;
+   if (!glfwInit()){
+      utils::error("init glfw");
+      return 0;
+   }
+
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+   win = glfwCreateWindow(WIDTH, HEIGHT, "win", 0, 0); 
+   if (win == NULL){
+      utils::error("open window");
+      glfwTerminate();
+      return 0;
+   }
+   glfwMakeContextCurrent(win);
+   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+      utils::error("init glad");
+      glfwTerminate();
+      return 0;
+   }
+   glfwSetFramebufferSizeCallback(win, frame_buffer_size);
+   utils::log("load window");
+   return win;
+}
+
+
 void check_status_shader_program(uint shader_program){
    int res; 
    char info[512];
@@ -56,7 +87,7 @@ void Shader::create_shader(uint* shader, const char src[], GLuint type){
    if (!res) {
       glGetShaderInfoLog(*shader, 512, NULL, info);;
       utils::error(src, info);
-   } else utils::log(src, "created shader");
+   } else utils::log(src, "load shader");
 }
 
 void Shader::use(fvec4 color){
@@ -98,19 +129,25 @@ Texture::Texture(const char texture_path[], int img_type){
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
    int width, height, color_channels;
-   stbi_set_flip_vertically_on_load(true);
+
    unsigned char *data = stbi_load(texture_path, &width, &height, &color_channels, 0);
    if (!data){ 
       utils::error(texture_path, "couldn't load data");
       assert(data);
    } 
-   if (img_type == PNG)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-   else
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+   switch(img_type){
+      case PNG:
+         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+         break;
+      case JPG:
+         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+         break;
+   }
+
    glGenerateMipmap(GL_TEXTURE_2D);
    stbi_image_free(data);
-   utils::log(texture_path,"created texture");
+   utils::log(texture_path,"load texture");
 }
 
 Texture::~Texture(){

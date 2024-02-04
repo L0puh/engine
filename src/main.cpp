@@ -1,38 +1,18 @@
 #include "engine.h"
+
 #include <GLFW/glfw3.h>
-#include <cstdio>
+#include <cassert>
 #include <sys/types.h>
-#include "utils.h"
 
 const int WIDTH = 300;
 const int HEIGHT = 300;
 
 
 int main(){
-   GLFWwindow* win;
-   if (!glfwInit()){
-      utils::error("init glfw");
-      return 0;
-   }
 
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-   win = glfwCreateWindow(WIDTH, HEIGHT, "win", 0, 0); 
-   if (win == NULL){
-      utils::error("open window");
-      glfwTerminate();
-      return 0;
-   }
-   glfwMakeContextCurrent(win);
-   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
-      utils::error("init glad");
-      glfwTerminate();
-      return 0;
-   }
-
-   glfwSetFramebufferSizeCallback(win, frame_buffer_size);
+// WINDOW: 
+   GLFWwindow* win =  init_window(WIDTH, HEIGHT);
+   assert(win != 0);
 
 // SHADERS: 
 
@@ -43,7 +23,7 @@ int main(){
 // TEXTURES:
 
    Texture tx  ("../textures/wall.jpg", JPG);
-   Texture tx2 ("../textures/grok.png", PNG);
+   Texture tx2 ("../textures/face.png", PNG);
 
 // VERTICIES: 
 
@@ -56,10 +36,11 @@ int main(){
 
    float vertices3[] = {
       // x   y     z          texture
-       0.0f, 0.8f, 0.0f,   0.5f, 1.0f,
-    -0.8f,-0.8f, 0.0f,   0.0f, 0.0f,
-     0.8f,-0.8f, 0.0f,   1.0f, 0.0f,
+       0.0f, 0.8f, 0.0f,   2.0f, 0.0f,
+    -0.8f,-0.8f, 0.0f,     0.0f, 0.0f,
+     0.8f,-0.8f, 0.0f,     0.0f, 2.0f,
    };
+
    float vertices2[] = {
      // x   y     z        R     G    B
       0.3f, -0.3f, 0.0f,  0.0f, 0.0f, 1.0f,  //0
@@ -123,7 +104,6 @@ int main(){
    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
    glEnableVertexAttribArray(1);
 
-   utils::log("setup openGl");
 
    glClearColor(0.25f, 0.4f, 0.5f, 1.0f);
    bool triangle_pressed = false, cube_pressed = true;
@@ -148,14 +128,13 @@ int main(){
          }
       }
       if (triangle_pressed) {
-         //draw triangles
+         //draw triangles (with two textures)
          tx.use(tx2.ID);
          s3.use();
          glBindVertexArray(VAOs[1]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
          glBindVertexArray(0);
          
-         s2.set_float(name, move);
          s2.use();
          glBindVertexArray(VAOs[0]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -187,6 +166,7 @@ int main(){
       glfwSwapBuffers(win);
       glClear(GL_COLOR_BUFFER_BIT);
    }
+
    glfwDestroyWindow(win);
    glfwTerminate();
 

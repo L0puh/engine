@@ -11,6 +11,7 @@
 
 void check_status_shader_program(uint shader_program);
 void frame_buffer_size(GLFWwindow* window, int width, int height);
+GLFWwindow* init_window(const int WIDTH, const int HEIGHT);
 
 enum Types {
    PNG,
