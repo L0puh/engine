@@ -12,6 +12,11 @@
 void check_status_shader_program(uint shader_program);
 void frame_buffer_size(GLFWwindow* window, int width, int height);
 
+enum Types {
+   PNG,
+   JPG
+};
+
 struct fvec4{
    float r;
    float g;
@@ -37,7 +42,7 @@ class Shader {
 
 class Texture {
    public:
-      Texture(const char texture_path[]);
+      Texture(const char texture_path[], int type);
       ~Texture();
    public:
       uint ID;

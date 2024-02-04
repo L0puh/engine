@@ -36,29 +36,29 @@ int main(){
 
 // SHADERS: 
 
-   Shader s1("../shaders/shader.vert", "../shaders/shader.frag");     // with uniform
+   Shader s1("../shaders/shader.vert", "../shaders/shader.frag");      // with uniform
    Shader s2("../shaders/shader.vert", "../shaders/shader2.frag");    
-   Shader s3("../shaders/shader2.vert", "../shaders/shader_tex.frag"); //with texture
+   Shader s3("../shaders/shader2.vert", "../shaders/shader_tex.frag"); // with texture
 
 // TEXTURES:
 
-   Texture tx("../textures/wall.jpg");
-   Texture tx2("../textures/face.png");
+   Texture tx  ("../textures/wall.jpg", JPG);
+   Texture tx2 ("../textures/grok.png", PNG);
 
 // VERTICIES: 
 
    float vertices[] = {
    //  x     y       z    colors 
-      0.0f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // bottom right
-      0.9f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // bottom left 
-      0.45f, 0.5f, 0.0f,  0.0f, 0.0f, 1.0f  // top
+      0.0f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  
+      0.9f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 
+      0.45f, 0.5f, 0.0f,  0.0f, 0.0f, 1.0f   
    };
 
    float vertices3[] = {
       // x   y     z          texture
-        0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   
-        0.5f, -0.5f, 0.0f,   1.0f, -1.0f,    // FIXME
-        -0.5f, -0.5f, 0.0f,  -1.0f, -1.0f,   
+       0.0f, 0.8f, 0.0f,   0.5f, 1.0f,
+    -0.8f,-0.8f, 0.0f,   0.0f, 0.0f,
+     0.8f,-0.8f, 0.0f,   1.0f, 0.0f,
    };
    float vertices2[] = {
      // x   y     z        R     G    B
@@ -79,7 +79,6 @@ int main(){
       6, 1, 0,
       6, 4, 0
    };
-
 
 // BUFFERS: 
    uint VBOs[4], VAOs[4], EBOs[2];
@@ -130,11 +129,11 @@ int main(){
    bool triangle_pressed = false, cube_pressed = true;
    float move = 0;
    std::string name = "move";
+   std::string n1 = "my_texture", n2 = "my_texture2";
 
-   std::string tx_name = "my_texture", tx_name2 = "my_texture2";
    s3.use();
-   s3.set_int(tx_name, 0);
-   s3.set_int(tx_name2, 1);
+   s3.set_int(n1, 0);
+   s3.set_int(n2, 1);
   
 
 // MAIN LOOP:
@@ -151,16 +150,15 @@ int main(){
       if (triangle_pressed) {
          //draw triangles
          tx.use(tx2.ID);
-         
          s3.use();
          glBindVertexArray(VAOs[1]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
          glBindVertexArray(0);
          
-         /* s2.set_float(name, move); */
-         /* s2.use(); */
-         /* glBindVertexArray(VAOs[0]); */
-         /* glDrawArrays(GL_TRIANGLES, 0, 3); */
+         s2.set_float(name, move);
+         s2.use();
+         glBindVertexArray(VAOs[0]);
+         glDrawArrays(GL_TRIANGLES, 0, 3);
 
       } else if (cube_pressed) {
          //draw a cube 

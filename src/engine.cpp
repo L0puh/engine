@@ -87,7 +87,7 @@ void Shader::set_int(std::string &name, int x){
 //                    TEXTURE                         //
 /******************************************************/
 
-Texture::Texture(const char texture_path[]){
+Texture::Texture(const char texture_path[], int img_type){
    glGenTextures(1, &ID);
    glBindTexture(GL_TEXTURE_2D, ID);
 
@@ -98,12 +98,16 @@ Texture::Texture(const char texture_path[]){
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
    int width, height, color_channels;
+   stbi_set_flip_vertically_on_load(true);
    unsigned char *data = stbi_load(texture_path, &width, &height, &color_channels, 0);
    if (!data){ 
       utils::error(texture_path, "couldn't load data");
       assert(data);
-   }
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+   } 
+   if (img_type == PNG)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+   else
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
    glGenerateMipmap(GL_TEXTURE_2D);
    stbi_image_free(data);
    utils::log(texture_path,"created texture");
@@ -123,6 +127,7 @@ void Texture::use(uint ID2){
    
 }
 void Texture::use(){
+   glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, ID);
 }
 
