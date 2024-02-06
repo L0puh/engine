@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "glm/gtc/type_ptr.hpp"
 #include "utils.h"
 #include <cassert>
 #include <string>
@@ -10,6 +11,7 @@
 
 GLFWwindow* init_window(const int WIDTH, const int HEIGHT){
    GLFWwindow* win;
+
    if (!glfwInit()){
       utils::error("init glfw");
       return 0;
@@ -21,7 +23,7 @@ GLFWwindow* init_window(const int WIDTH, const int HEIGHT){
 
    win = glfwCreateWindow(WIDTH, HEIGHT, "win", 0, 0); 
    if (win == NULL){
-      utils::error("open window");
+      utils::error("init window");
       glfwTerminate();
       return 0;
    }
@@ -32,7 +34,7 @@ GLFWwindow* init_window(const int WIDTH, const int HEIGHT){
       return 0;
    }
    glfwSetFramebufferSizeCallback(win, frame_buffer_size);
-   utils::log("load window");
+   utils::log("init window");
    return win;
 }
 
@@ -90,29 +92,44 @@ void Shader::create_shader(uint* shader, const char src[], GLuint type){
    } else utils::log(src, "load shader");
 }
 
-void Shader::use(fvec4 color){
-   int location = glGetUniformLocation(ID, "color");
-   assert(location != -1);
-   glUseProgram(ID);
-   glUniform4f(location, color.r, color.g, color.b, color.apacity);
+int Shader::get_location(const char name[]){
+   int location;
+   if (cached_locations[name])
+      return cached_locations[name];
+
+   location = glGetUniformLocation(ID, name);
+   if (location == -1){
+      utils::error("location", name);
+      assert(location != -1);
+   }
+   cached_locations[name] = location;
+   return location;
 }
 
 void Shader::use(){
    glUseProgram(ID);
 }
 
-void Shader::set_float(std::string &name, float x){
-   int location = glGetUniformLocation(ID, name.c_str());
-   assert(location != -1);
+void Shader::set_float(const char name[], float x){
+   int location = get_location(name);
    glUniform1f(location, x); 
 
 }
-void Shader::set_int(std::string &name, int x){
-   int location = glGetUniformLocation(ID, name.c_str());
-   assert(location != -1);
+
+void Shader::set_int(const char name[], int x){
+   int location = get_location(name);
    glUniform1i(location, x); 
 }
 
+void Shader::set_vec4(const char name[], fvec4 vec){
+   int location = get_location(name);
+   glUniform4f(location, vec.x, vec.y, vec.z, vec.w);
+}
+
+void Shader::set_matrix4fv(const char name[], glm::mat4 data){
+   int location = get_location(name);
+   glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(data));
+}
 
 /******************************************************/
 //                    TEXTURE                         //
@@ -121,7 +138,6 @@ void Shader::set_int(std::string &name, int x){
 Texture::Texture(const char texture_path[], int img_type){
    glGenTextures(1, &ID);
    glBindTexture(GL_TEXTURE_2D, ID);
-
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 

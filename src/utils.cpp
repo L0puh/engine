@@ -1,4 +1,6 @@
 #include "utils.h"
+
+#include <cassert>
 #include <fstream>
 #include <sstream>
 
@@ -15,8 +17,15 @@ namespace utils{
          source = stream_file.str();
       }
       catch(std::ifstream::failure e){
-         utils::error("cant' open the file", filename);
+         utils::error("open file", filename);
       }
       return source;
+   }
+   void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLuint severity,
+                                   GLsizei length, const GLchar* message, const GLvoid* userParam ){
+     if (type == GL_DEBUG_TYPE_ERROR){
+        utils::error(message, std::to_string(type));
+     }
+     assert(type != GL_DEBUG_TYPE_ERROR);
    }
 }

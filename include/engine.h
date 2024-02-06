@@ -1,12 +1,14 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include "glm/ext/matrix_float4x4.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 
 #include <string>
 #include <sys/types.h>
+#include <unordered_map>
 #define LEN(x) sizeof(x)/sizeof(x[0])
 
 void check_status_shader_program(uint shader_program);
@@ -19,10 +21,10 @@ enum Types {
 };
 
 struct fvec4{
-   float r;
-   float g;
-   float b;
-   float apacity;
+   float x;
+   float y;
+   float z;
+   float w;
 };
 
 class Shader {
@@ -32,13 +34,18 @@ class Shader {
 
    public:
       uint ID;
-      void use(fvec4 color);
       void use();
 
-      void set_float(std::string &name, float x);
-      void set_int(std::string &name, int x);
+      void set_float(const char name[], float x);
+      void set_int(const char name[], int x);
+      void set_matrix4fv(const char name[], glm::mat4 data);
+      void set_vec4(const char name[], fvec4 vec);
+
    private:
+      std::unordered_map<std::string, int> cached_locations;
+
       void create_shader(uint* shader, const char src[], GLuint type);
+      int get_location(const char name[]);
 };
 
 class Texture {
