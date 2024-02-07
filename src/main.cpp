@@ -1,5 +1,4 @@
 #include "engine.h"
-#include "glm/ext/matrix_transform.hpp"
 #include "utils.h"
 
 #include <GLFW/glfw3.h>
@@ -10,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <typeinfo>
 
 #define DEBUG_MODE 
 
@@ -31,9 +31,10 @@ int main(){
 
 // SHADERS: 
 
-   Shader s1("../shaders/shader.vert", "../shaders/shader.frag");      // with uniform
-   Shader s2("../shaders/shader.vert", "../shaders/shader2.frag");    
-   Shader s3("../shaders/shader2.vert", "../shaders/shader_tex.frag"); // with texture
+   Shader s1("../shaders/shader.vert",       "../shaders/shader.frag");             // with uniform
+   Shader s2("../shaders/shader.vert",       "../shaders/shader2.frag");    
+   Shader s3("../shaders/shader2.vert",      "../shaders/shader_tex.frag");        // with texture
+   Shader s4("../shaders/shader_floor.vert", "../shaders/shader_floor.frag");
 
 // TEXTURES:
 
@@ -58,13 +59,13 @@ int main(){
 
    float vertices2[] = {
      // x   y     z        R     G    B
-      0.3f, -0.3f, 0.0f,  0.0f, 0.0f, 1.0f,  //0
-      0.0f, -0.6f, 0.0f,  0.0f, 0.0f, 1.0f,  //1
-      -0.6f, -0.6f, 0.0f, 0.0f, 0.0f, 1.0f,  //2
-      -0.3f, 0.3f, 0.0f,  1.0f, 0.0f, 0.0f,  //3
-      0.3f, 0.3f, 0.0f,   1.0f, 0.0f, 0.0f,  //4
-      -0.6f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  //5
-      0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,  //6
+      0.3f, -0.3f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //0
+      0.0f, -0.6f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 0.0f, //1
+      -0.6f, -0.6f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, //2
+      -0.3f, 0.3f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  //3
+      0.3f, 0.3f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  //4
+      -0.6f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f,//5
+      0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, 1.0f //6
    };
 
    uint indices[] = {
@@ -76,14 +77,26 @@ int main(){
       6, 4, 0
    };
 
+   float vertices4[] = {
+     0.5f,  0.5f, 0.0f,    1.0f, 1.0f, // top right      0
+     0.5f, -0.5f, 0.0f,    1.0f, 0.0f, // bottom right   1
+     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left    2
+     -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left       3
+   };
 
 
-// BUFFERS: 
-   uint VBOs[4], VAOs[4], EBOs[2];
-   glGenVertexArrays(4, VAOs);
-   glGenBuffers(4, VBOs);
-   glGenBuffers(2, EBOs);
    
+   uint indices1[] = {
+     0, 1, 3, 
+     1, 2, 3  
+   };
+  
+// BUFFERS: 
+   uint VBOs[5], VAOs[5], EBOs[3];
+   glGenVertexArrays(5, VAOs);
+   glGenBuffers(5, VBOs);
+   glGenBuffers(3, EBOs);
+  
    //TRIANGLE 1
    glBindVertexArray(VAOs[0]);
    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
@@ -112,38 +125,56 @@ int main(){
    glBindBuffer(GL_ARRAY_BUFFER, VBOs[2]);
    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
 
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[0]);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[1]);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) , indices, GL_STATIC_DRAW);
    // pos
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
    glEnableVertexAttribArray(0);
    //color 
-   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
    glEnableVertexAttribArray(1);
+   //texture
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(5*sizeof(float)));
+   glEnableVertexAttribArray(2);
 
+   
+   //FLOOR 
+   glBindVertexArray(VAOs[3]);
+   glBindBuffer(GL_ARRAY_BUFFER, VBOs[3]);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices4), vertices4, GL_STATIC_DRAW);
 
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[0]);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices1), indices1, GL_STATIC_DRAW);
+   //pos 
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
+   glEnableVertexAttribArray(0);
+   //tex
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+   glEnableVertexAttribArray(1);
+   
    glClearColor(0.25f, 0.4f, 0.5f, 1.0f);
-   bool triangle_pressed = false, cube_pressed = true;
    float move = 0;
 
+   bool triangle = false, cube = false, floor = true;
    s3.use();
    s3.set_int("my_texture", 0);
    s3.set_int("my_texture2", 1);
-  
+
+
 
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
       //moving  
       if (glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS){
+         
          if (move-0.04f > -1.0f)
             move-=0.04f;
-      } else if (glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS){
-         if (move+0.04f < 1.0f){
-            move+=0.04f;
-         }
-      }
-      if (triangle_pressed) {
 
+      } else if (glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS){
+         if (move+0.04f < 1.0f)
+            move+=0.04f;
+      }
+      if (triangle) {
          //matricies (rotate an object over time)
          glm::mat4 trans = glm::mat4(1.0f);
          trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, -0.3f));
@@ -152,39 +183,43 @@ int main(){
 
          //draw triangles (with two textures)
          tx.use(tx2.ID);
-
          s3.use();
          s3.set_matrix4fv("transform", trans);
          glBindVertexArray(VAOs[1]);
          glDrawArrays(GL_TRIANGLES, 0, 3);
          glBindVertexArray(0);
-         
 
-      } else if (cube_pressed) {
+      } else if (cube) {
          //draw a cube 
+         tx.use();
          s2.use();
          s2.set_float("move", move);
-
          glBindVertexArray(VAOs[2]);
          glDrawElements(GL_TRIANGLES, LEN(indices), GL_UNSIGNED_INT, 0);
+         glBindVertexArray(0);
 
-         s1.use();
-         s1.set_vec4("color", {0.0f, 0.0f, 0.0f, 1.0f});
-         s1.set_float("move", move);
-         glDrawElements(GL_LINE_LOOP, LEN(indices), GL_UNSIGNED_INT, 0);
+      } else if (floor){
+         // COORDINATES
+         
+         glm::mat4 model, view, projection;
+         model = view = projection = glm::mat4(1.0f);
+         model = glm::rotate(model, glm::radians(-65.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+         model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.0f));
+         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+         projection = glm::perspective(glm::radians(45.0f), (float)WIDTH/HEIGHT, 0.1f, 100.f);
+
+         // draw floor 
+         tx.use();
+         s4.use();
+         s4.set_matrix4fv("model", model);
+         s4.set_matrix4fv("view", view);
+         s4.set_matrix4fv("projection", projection);
+
+         glBindVertexArray(VAOs[3]);
+         glDrawElements(GL_TRIANGLES, LEN(indices1), GL_UNSIGNED_INT, 0);
+         glBindVertexArray(0);
       }
 
-      if (glfwGetKey(win, GLFW_KEY_C) == GLFW_PRESS){
-         if (triangle_pressed) {
-            triangle_pressed = false;
-            cube_pressed = true;
-         }
-      } else if (glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_PRESS){
-         if (cube_pressed) {
-            triangle_pressed = true;
-            cube_pressed = false;
-         }
-      }
       glfwSetKeyCallback(win, Input::get_input);
       glfwPollEvents();
       glfwSwapBuffers(win);

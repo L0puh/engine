@@ -1,7 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "glm/ext/matrix_float4x4.hpp"
+#include <glm/ext/matrix_float4x4.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -20,12 +20,6 @@ enum Types {
    JPG
 };
 
-struct fvec4{
-   float x;
-   float y;
-   float z;
-   float w;
-};
 
 class Shader {
    public:
@@ -39,7 +33,7 @@ class Shader {
       void set_float(const char name[], float x);
       void set_int(const char name[], int x);
       void set_matrix4fv(const char name[], glm::mat4 data);
-      void set_vec4(const char name[], fvec4 vec);
+      void set_vec4(const char name[], glm::vec4 vec);
 
    private:
       std::unordered_map<std::string, int> cached_locations;

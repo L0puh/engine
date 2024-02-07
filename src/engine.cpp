@@ -121,7 +121,7 @@ void Shader::set_int(const char name[], int x){
    glUniform1i(location, x); 
 }
 
-void Shader::set_vec4(const char name[], fvec4 vec){
+void Shader::set_vec4(const char name[], glm::vec4 vec){
    int location = get_location(name);
    glUniform4f(location, vec.x, vec.y, vec.z, vec.w);
 }
@@ -180,7 +180,6 @@ void Texture::use(uint ID2){
    
 }
 void Texture::use(){
-   glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, ID);
 }
 
