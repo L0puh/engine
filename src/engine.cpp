@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <cassert>
 #include <string>
+#include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -200,5 +201,50 @@ void Input::get_input(GLFWwindow* window, int key, int scancode, int action, int
          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          break;
    }
+}
+
+
+
+/******************************************************/
+//                    VERTEX ARRAY                    //
+/******************************************************/
+
+Vertex_array::Vertex_array(){
+   glGenVertexArrays(1, &VAO);
+}
+
+Vertex_array::~Vertex_array(){
+   glDeleteVertexArrays(1, &VAO);
+   glDeleteBuffers(1, &VBO);
+}
+
+void Vertex_array::create_VBO(const void* data, size_t size){
+   bind();
+   glGenBuffers(1, &VBO);
+   glBindBuffer(GL_ARRAY_BUFFER, VBO);
+   glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+}
+
+void Vertex_array::create_EBO(const void* data, size_t size){
+   bind();
+   glGenBuffers(1, &EBO);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+}
+
+void Vertex_array::add_buffer(Layout& layout){
+   glBindVertexArray(VAO);
+   glBindBuffer(GL_ARRAY_BUFFER, VBO);
+   const std::vector<Layout_element> elements = layout.get_elements(); 
+   size_t offset = 0;
+   for (int i = 0; i != elements.size(); i++){
+      Layout_element el = elements.at(i);
+      glVertexAttribPointer(i, el.count, el.type, el.normalised, layout.get_stride(), (void*)offset);
+      glEnableVertexAttribArray(i);
+      offset += el.count * sizeof(el.type);
+   }
+}
+void Vertex_array::bind(){
+   glBindVertexArray(VAO);
 }
 
