@@ -58,9 +58,19 @@ class Texture {
 
 /*******************************************************************************/
 
+
+struct Camera {
+   glm::vec3 pos;
+   glm::vec3 front;
+   glm::vec3 up;
+   float speed;
+
+};
+
 class Input {
    public:
-      static void get_input(GLFWwindow* window, int key, int scancode, int action, int mods);
+      static void get_input(GLFWwindow* window, Camera *camera);
+      static bool is_pressed(GLFWwindow* window, int key);
 };
 
 

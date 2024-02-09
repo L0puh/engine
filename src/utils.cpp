@@ -5,6 +5,11 @@
 #include <sstream>
 
 namespace utils{
+   std::pair<int, int> get_view_point(GLFWwindow *window){
+      int view_point[2];
+      glfwGetFramebufferSize(window, &view_point[0], &view_point[1]);
+      return {view_point[0], view_point[1]};
+   }
    std::string get_source_from_file(const char filename[]){
       std::string source;
       std::ifstream file;

@@ -2,8 +2,12 @@
 #define UTILS_H
 #include <string>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <utility>
 
 namespace utils{
+
+   std::pair<int, int> get_view_point(GLFWwindow *window);
    std::string get_source_from_file(const char filename[]);
    void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLuint severity,
                                    GLsizei length, const GLchar* message, const GLvoid* userParam );

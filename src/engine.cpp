@@ -1,6 +1,8 @@
 #include "engine.h"
+#include "glm/ext/quaternion_geometric.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "utils.h"
+#include <GLFW/glfw3.h>
 #include <cassert>
 #include <string>
 #include <vector>
@@ -188,21 +190,34 @@ void Texture::use(){
 //                    INPUT                           //
 /******************************************************/
 
-void Input::get_input(GLFWwindow* window, int key, int scancode, int action, int mods){
-   switch(key){
-      case GLFW_KEY_ESCAPE:
-         glfwSetWindowShouldClose(window, true);
-         utils::log("close the program");
-         break;
-      case GLFW_KEY_P:
-         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-         break;
-      case GLFW_KEY_F:
-         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-         break;
-   }
+bool Input::is_pressed(GLFWwindow* window, int key){
+   return glfwGetKey(window, key) == GLFW_PRESS;
 }
 
+void Input::get_input(GLFWwindow* window, Camera* camera){
+   if (is_pressed(window, GLFW_KEY_ESCAPE)){
+        glfwSetWindowShouldClose(window, true);
+        utils::log("close the program");
+    }
+   if (is_pressed(window, GLFW_KEY_P)){
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   }
+   if (is_pressed(window, GLFW_KEY_F)){
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+   }
+   if (is_pressed(window, GLFW_KEY_W)){
+      camera->pos += camera->speed * camera->front;
+   }
+   if (is_pressed(window, GLFW_KEY_S)){
+      camera->pos -= camera->speed * camera->front;
+   }
+   if (is_pressed(window, GLFW_KEY_A)){
+      camera->pos -= glm::normalize(glm::cross(camera->front, camera->up)) * camera->speed;
+   }
+   if (is_pressed(window, GLFW_KEY_D)){
+      camera->pos += glm::normalize(glm::cross(camera->front, camera->up)) * camera->speed;
+   }
+}
 
 
 /******************************************************/
