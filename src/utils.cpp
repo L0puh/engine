@@ -5,6 +5,8 @@
 #include <sstream>
 
 namespace utils{
+
+
    std::pair<int, int> get_view_point(GLFWwindow *window){
       int view_point[2];
       glfwGetFramebufferSize(window, &view_point[0], &view_point[1]);

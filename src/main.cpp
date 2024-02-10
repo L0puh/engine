@@ -17,13 +17,14 @@
 
 const int WIDTH  = 300;
 const int HEIGHT = 300;
-const float SPEED = 2.5f;
+
 
 int main(){
 
 // WINDOW: 
    GLFWwindow* win =  init_window(WIDTH, HEIGHT);
    glEnable(GL_DEPTH_TEST);
+   glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
    assert(win != 0);
 
    #ifdef DEBUG_MODE
@@ -154,23 +155,30 @@ int main(){
    s3.set_int("my_texture2", 1);
 
 //CAMERA:
-   glm::vec3 camera_pos, camera_up, camera_front;
-   camera_pos   = glm::vec3(0.0f, 0.0f, 3.0f);
-   camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
-   camera_up    = glm::vec3(0.0f, 1.0f, 0.0f);
-   Camera camera{camera_pos, camera_front, camera_up, SPEED};
    float deltatime=0.0f, lastframe=0.0f;
+   float fov = FOV;
+   float x =  WIDTH / 2.0f, y = HEIGHT / 2.0f;
+   int mode = FLY;
+   Camera camera;
 
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
+      
       float current_frame = glfwGetTime();
       deltatime = current_frame - lastframe;
       lastframe = current_frame;
-      camera.speed = SPEED * deltatime;
+
+      camera.proccess_keyboard(win, deltatime);
+      camera.proccess_mouse(win, &x, &y);
+      
+      if (Input::is_pressed(win, GLFW_KEY_Z)){
+         camera.zoom(&fov);
+      }
       //moving  
       if (Input::is_pressed(win, GLFW_KEY_UP)){
          rotate++;
-      }
+      } 
+
       if (tg) {
          //MATrices (rotate an object over time)
          glm::mat4 trans = glm::mat4(1.0f);
@@ -196,7 +204,7 @@ int main(){
          model = glm::scale(model, glm::vec3(1.0, 1.0, 1.0));
          view = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
          std::pair<int, int> view_point = utils::get_view_point(win);
-         projection = glm::perspective(glm::radians(50.0f), (float)view_point.first/view_point.second, 0.1f, 100.f);
+         projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
 
          tx.use();
          s4.use();
@@ -230,7 +238,8 @@ int main(){
          glDrawElements(GL_TRIANGLES, LEN(indices1), GL_UNSIGNED_INT, 0);
          glBindVertexArray(0);
       }
-      Input::get_input(win, &camera);
+
+      glfwSetKeyCallback(win, Input::key_callback);
       glfwPollEvents();
       glfwSwapBuffers(win);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

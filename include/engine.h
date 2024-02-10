@@ -57,20 +57,40 @@ class Texture {
 };
 
 /*******************************************************************************/
+enum modes{
+   FLY,
+   WALK,
+};
 
+const float SPEED = 2.5f, 
+            SENSITIVITY = 0.05f,
+            PITCH = 0.0f,
+            YAW = -90.0f,
+            FOV = 55.0f;
 
-struct Camera {
-   glm::vec3 pos;
-   glm::vec3 front;
-   glm::vec3 up;
-   float speed;
+class Camera {
+   public: 
+      glm::vec3 pos, front,  up, right;
+      float speed, sensitivity, zoom_scale = 0;
+      float pitch, yaw;
+      int mode;
+   public:
+      Camera(glm::vec3 position = {0.0, 0.0, 0.0}, glm::vec3 up = {0.0, 1.0, 0.0}, 
+            float yaw = YAW, float pitch = PITCH, int mode = FLY);
+      void update_vectors();
+      glm::mat4 get_view();
+      void proccess_keyboard(GLFWwindow *window, float deltatime);
+      void proccess_mouse(GLFWwindow *window, float *last_x, float *last_y);
+      void zoom(float *fov);
 
+   private:
 };
 
 class Input {
    public:
-      static void get_input(GLFWwindow* window, Camera *camera);
       static bool is_pressed(GLFWwindow* window, int key);
+      static void mouse_callback(GLFWwindow *window, double x, double y);      
+      static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };
 
 
