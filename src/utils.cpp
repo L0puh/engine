@@ -10,6 +10,10 @@
 
 namespace utils{
 
+   void frame_buffer_size(GLFWwindow* window, int width, int height){
+      glViewport(0, 0, width, height);
+      utils::log("changed view port");
+   }
 
    std::pair<int, int> get_view_point(GLFWwindow *window){
       int view_point[2];
@@ -57,23 +61,32 @@ namespace utils{
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
    }
+   bool Debug::is_hovered(){
+      return hovered;
+   }
+   bool Debug::is_clicked(){
+      return clicked;
+   }
    void Debug::render(){
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
    }
-   
-   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode){
-
+   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov){
       ImGuiWindowFlags flags = 0;
-      flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+      flags |= ImGuiWindowFlags_AlwaysAutoResize;
+
       ImGui::Begin("console", 0, flags);
       {
+         if (ImGui::IsItemHovered()) hovered = true;
+         else hovered = false;
+         if (ImGui::IsItemClicked()) clicked = true;
+         else clicked = false;
          ImGui::Text("change:");
          ImGui::Checkbox("Triangle:", tg);
          ImGui::Checkbox("Cube:", cb);
          ImGui::Checkbox("Floor:", fl);
          ImGui::Checkbox("FLY:", mode);
-
+         ImGui::SliderFloat("zoom scale", fov, 0.0f, 100.0f, "%.0f", 0);
       }
       ImGui::End();
    }

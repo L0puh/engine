@@ -2,6 +2,7 @@
 #define ENGINE_H 
 
 #include <glm/ext/matrix_float4x4.hpp>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -13,8 +14,21 @@
 #define LEN(x) sizeof(x)/sizeof(x[0])
 
 void check_status_shader_program(uint shader_program);
-void frame_buffer_size(GLFWwindow* window, int width, int height);
 GLFWwindow* init_window(const int WIDTH, const int HEIGHT);
+
+
+/*******************************************************************************/
+
+const int 
+WIDTH  = 300,
+HEIGHT = 300;
+
+const float 
+SPEED = 2.5f, 
+SENSITIVITY = 0.05f,
+PITCH = 0.0f,
+YAW = -90.0f,
+FOV = 55.0f;
 
 /*******************************************************************************/
 
@@ -61,11 +75,6 @@ enum modes{
    WALK,
 };
 
-const float SPEED = 2.5f, 
-            SENSITIVITY = 0.05f,
-            PITCH = 0.0f,
-            YAW = -90.0f,
-            FOV = 55.0f;
 
 class Camera {
    public: 
@@ -80,7 +89,7 @@ class Camera {
       glm::mat4 get_view();
       void proccess_keyboard(GLFWwindow *window, float deltatime, bool mode);
       void proccess_mouse(GLFWwindow *window, float *last_x, float *last_y);
-      void zoom(float *fov);
+      static void zoom(float scale, float *fov);
 
    private:
 };

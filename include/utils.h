@@ -13,6 +13,7 @@
 
 namespace utils{
 
+   void frame_buffer_size(GLFWwindow* window, int width, int height);
    std::pair<int, int> get_view_point(GLFWwindow *window);
    std::string get_source_from_file(const char filename[]);
    void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLuint severity,
@@ -24,13 +25,17 @@ namespace utils{
    inline void error(std::string y, std::string x){printf("[-] error in %s: %s\n",y.c_str(), x.c_str());}
 
    class Debug {
+      
       public:
          Debug(GLFWwindow *window);
          ~Debug();
          void new_frame();
          void render();
-         void draw(bool *tg, bool *cb, bool *fl, bool *mode);
-
+         void draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov);
+         bool is_clicked();
+         bool is_hovered();
+      private:
+         bool clicked, hovered;
    };
 }
 #endif

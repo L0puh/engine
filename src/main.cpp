@@ -10,10 +10,6 @@
 
 #define DEBUG_MODE 
 
-const int WIDTH  = 300;
-const int HEIGHT = 300;
-
-
 int main(){
 
 // WINDOW: 
@@ -154,7 +150,8 @@ int main(){
    float deltatime=0.0f, lastframe=0.0f;
    float fov = FOV;
    float x =  WIDTH / 2.0f, y = HEIGHT / 2.0f;
-   bool mode = 1;
+   bool mode = 1, hovered = 0;
+
    Camera camera;
 
 // MAIN LOOP:
@@ -174,23 +171,11 @@ int main(){
       camera.proccess_keyboard(win, deltatime, mode);
       camera.proccess_mouse(win, &x, &y);
       
-      if (Input::is_pressed(win, GLFW_KEY_Z)){
-         camera.zoom(&fov);
-      }
       //moving  
       if (Input::is_pressed(win, GLFW_KEY_UP)){
          rotate++;
       } 
-      if (Input::is_pressed(win, GLFW_KEY_C)){
-         // TODO:
-         //game mode 
-         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-      } 
-      if (Input::is_pressed(win, GLFW_KEY_J)){
-         //console mode
-         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-      } 
-      if (tg) {
+      if (tg ) {
          //MATrices (rotate an object over time)
          glm::mat4 trans = glm::mat4(1.0f);
          trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, -0.3f));
@@ -205,7 +190,8 @@ int main(){
          glDrawArrays(GL_TRIANGLES, 0, 3);
          glBindVertexArray(0);
 
-      } else if (cb) {
+      } 
+      if (cb) {
          //draw a cube 
          
          glm::mat4 model, view, projection;
@@ -229,7 +215,8 @@ int main(){
          glDrawArrays(GL_TRIANGLES, 0, 36);
          glBindVertexArray(0);
 
-      } else if (fl){
+      } 
+      if (fl){
          // COORDINATES
          glm::mat4 model, view, projection;
          model = view = projection = glm::mat4(1.0f);
@@ -252,9 +239,13 @@ int main(){
       }
 
       #ifdef DEBUG_MODE
-         //load imgui
-         debug_console.draw(&tg, &cb, &fl, &mode); 
-         debug_console.render(); 
+      if (Input::is_pressed(win, GLFW_KEY_C)){
+         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+         debug_console.draw(&tg, &cb, &fl, &mode, &fov); 
+      } else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
+         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      }
+      debug_console.render(); 
       #endif
       glfwSetKeyCallback(win, Input::key_callback);
       glfwSwapBuffers(win);
