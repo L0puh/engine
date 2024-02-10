@@ -1,6 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <string>
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_internal.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <utility>
@@ -16,5 +22,15 @@ namespace utils{
    inline void log(std::string x, std::string y){ printf("[+] %s %s\n", x.c_str(), y.c_str()); }
    inline void error(std::string x){printf("[-] error: %s\n", x.c_str());}
    inline void error(std::string y, std::string x){printf("[-] error in %s: %s\n",y.c_str(), x.c_str());}
+
+   class Debug {
+      public:
+         Debug(GLFWwindow *window);
+         ~Debug();
+         void new_frame();
+         void render();
+         void draw(bool *tg, bool *cb, bool *fl, bool *mode);
+
+   };
 }
 #endif

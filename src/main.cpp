@@ -1,19 +1,14 @@
-#include "engine.h"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/ext/vector_float3.hpp"
-#include "glm/trigonometric.hpp"
-#include "utils.h"
-#include <GLFW/glfw3.h>
 #include <cassert>
-#include <string>
 #include <sys/types.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define DEBUG_MODE 
+#include "engine.h"
+#include "utils.h"
 
+#define DEBUG_MODE 
 
 const int WIDTH  = 300;
 const int HEIGHT = 300;
@@ -31,6 +26,7 @@ int main(){
       glEnable(GL_DEBUG_OUTPUT);
       glDebugMessageCallback(utils::message_callback, 0);
       utils::log("DEBUG MODE ON");
+      utils::Debug debug_console(win);
    #endif
 
 // SHADERS: 
@@ -158,17 +154,24 @@ int main(){
    float deltatime=0.0f, lastframe=0.0f;
    float fov = FOV;
    float x =  WIDTH / 2.0f, y = HEIGHT / 2.0f;
-   int mode = FLY;
+   bool mode = 1;
    Camera camera;
 
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
-      
+
+      glfwPollEvents();
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      #ifdef DEBUG_MODE 
+       debug_console.new_frame();
+      #endif
+
       float current_frame = glfwGetTime();
       deltatime = current_frame - lastframe;
       lastframe = current_frame;
 
-      camera.proccess_keyboard(win, deltatime);
+      camera.proccess_keyboard(win, deltatime, mode);
       camera.proccess_mouse(win, &x, &y);
       
       if (Input::is_pressed(win, GLFW_KEY_Z)){
@@ -178,7 +181,15 @@ int main(){
       if (Input::is_pressed(win, GLFW_KEY_UP)){
          rotate++;
       } 
-
+      if (Input::is_pressed(win, GLFW_KEY_C)){
+         // TODO:
+         //game mode 
+         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      } 
+      if (Input::is_pressed(win, GLFW_KEY_J)){
+         //console mode
+         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+      } 
       if (tg) {
          //MATrices (rotate an object over time)
          glm::mat4 trans = glm::mat4(1.0f);
@@ -222,10 +233,11 @@ int main(){
          // COORDINATES
          glm::mat4 model, view, projection;
          model = view = projection = glm::mat4(1.0f);
+         model = glm::translate(model, glm::vec3(-0.4f, 0.0f, 0.0f));
          model = glm::rotate(model, glm::radians(-65.0f), glm::vec3(1.0f, 0.0f, 0.0f));
          model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.0f));
-         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-         projection = glm::perspective(glm::radians(45.0f), (float)WIDTH/HEIGHT, 0.1f, 100.f);
+         view = camera.get_view(); 
+         projection = glm::perspective(glm::radians(fov), (float)WIDTH/HEIGHT, 0.1f, 100.f);
 
          // draw floor 
          tx.use();
@@ -239,10 +251,13 @@ int main(){
          glBindVertexArray(0);
       }
 
+      #ifdef DEBUG_MODE
+         //load imgui
+         debug_console.draw(&tg, &cb, &fl, &mode); 
+         debug_console.render(); 
+      #endif
       glfwSetKeyCallback(win, Input::key_callback);
-      glfwPollEvents();
       glfwSwapBuffers(win);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    }
 
    glfwDestroyWindow(win);

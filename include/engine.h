@@ -5,7 +5,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
@@ -79,7 +78,7 @@ class Camera {
             float yaw = YAW, float pitch = PITCH, int mode = FLY);
       void update_vectors();
       glm::mat4 get_view();
-      void proccess_keyboard(GLFWwindow *window, float deltatime);
+      void proccess_keyboard(GLFWwindow *window, float deltatime, bool mode);
       void proccess_mouse(GLFWwindow *window, float *last_x, float *last_y);
       void zoom(float *fov);
 

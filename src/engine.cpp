@@ -215,11 +215,11 @@ void Camera::update_vectors(){
    up    = glm::normalize(glm::cross(right, front));
 }
 
-void Camera::proccess_keyboard(GLFWwindow *window, float deltatime){
+void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool mode){
    float velocity = speed * deltatime;
    if (Input::is_pressed(window, GLFW_KEY_W)){
       glm::vec3 forward = pos + (velocity * front);
-      if (mode == FLY && (forward.y > 0 || forward.y < 0))
+      if (mode && (forward.y > 0 || forward.y < 0))
          pos = forward;
       else if (forward.y > 0 || forward.y < 0){
          forward.y = 0;
@@ -229,7 +229,7 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime){
    }
    if (Input::is_pressed(window, GLFW_KEY_S)){
       glm::vec3 backward = pos - (velocity * front);
-      if (mode == FLY && (backward.y < 0||backward.y))
+      if (mode && (backward.y < 0||backward.y))
          pos = backward;
       else if (backward.y < 0 || backward.y > 0 ){
          backward.y = 0;
