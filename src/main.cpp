@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "engine.h"
+#include "glm/ext/matrix_transform.hpp"
 #include "utils.h"
 
 #define DEBUG_MODE 
@@ -15,6 +16,9 @@ int main(){
 // WINDOW: 
    GLFWwindow* win =  init_window(WIDTH, HEIGHT);
    glEnable(GL_DEPTH_TEST);
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+
    glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
    assert(win != 0);
 
@@ -27,15 +31,18 @@ int main(){
 
 // SHADERS: 
 
-   Shader s1("../shaders/shader.vert",       "../shaders/shader.frag");             // with uniform
-   Shader s2("../shaders/shader.vert",       "../shaders/shader2.frag");    
-   Shader s3("../shaders/shader2.vert",      "../shaders/shader_tex.frag");        // with texture
-   Shader s4("../shaders/shader_floor.vert", "../shaders/shader_floor.frag");
+   Shader s1("../shaders/shader.vert",               "../shaders/shader.frag");             // with uniform
+   Shader s2("../shaders/shader.vert",               "../shaders/shader2.frag");    
+   Shader s3("../shaders/shader2.vert",              "../shaders/shader_tex.frag");        // with texture
+   Shader s4("../shaders/shader_floor.vert",         "../shaders/shader_floor.frag");
+   Shader hand_shader("../shaders/shader_hand.vert", "../shaders/shader_hand.frag");
 
 // TEXTURES:
 
-   Texture tx  ("../textures/wall.jpg", JPG);
-   Texture tx2 ("../textures/face.png", PNG);
+   Texture tx  ("../textures/wall.jpg", JPG, GL_REPEAT);
+   Texture tx2 ("../textures/face.png", PNG, GL_REPEAT);
+   Texture tx3 ("../textures/wall2.jpg", JPG, GL_REPEAT);
+   Texture hand_texture ("../textures/hand.png", PNG, GL_CLAMP_TO_BORDER);
 
 // VERTICIES: 
 
@@ -97,6 +104,14 @@ int main(){
      0.8f,-0.8f, 0.0f,     0.0f, 2.0f,
    };
 
+   float hand_verticies[] = {
+      // x   y     z          texture
+     0.5f,  0.5f, 0.0f,    1.0f, 1.0f, // top right      0
+     0.5f, -0.5f, 0.0f,    1.0f, 0.0f, // bottom right   1
+     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left    2
+     -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left       3
+   };
+
    float vertices4[] = {
      0.5f,  0.5f, 0.0f,    1.0f, 1.0f, // top right      0
      0.5f, -0.5f, 0.0f,    1.0f, 0.0f, // bottom right   1
@@ -115,17 +130,17 @@ int main(){
    data.pushf(3);
    data.pushf(2);
    
-   uint VBOs[5], VAOs[5], EBOs[3];
-   glGenVertexArrays(5, VAOs);
-   glGenBuffers(5, VBOs);
-   glGenBuffers(3, EBOs);
-  
    //TRIANGLE 1
    Vertex_array triangle;
    triangle.create_VBO(vertices3, sizeof(vertices3));
    triangle.add_buffer(data);
 
-   
+  
+   //HAND 
+   Vertex_array hand;
+   hand.create_VBO(vertices4, sizeof(hand_verticies));
+   hand.create_EBO(indices1, sizeof(indices1));
+   hand.add_buffer(data);
    //FLOOR 
    Vertex_array floor;
    floor.create_VBO(vertices4, sizeof(vertices4));
@@ -141,7 +156,7 @@ int main(){
    glClearColor(0.25f, 0.4f, 0.5f, 1.0f);
    float move = 0, rotate = 0;
 
-   bool tg = 0, cb = 1, fl= 0;
+   bool tg = 0, cb = 1, fl= 1, hands = 1;
    s3.use();
    s3.set_int("my_texture", 0);
    s3.set_int("my_texture2", 1);
@@ -175,21 +190,22 @@ int main(){
       if (Input::is_pressed(win, GLFW_KEY_UP)){
          rotate++;
       } 
-      if (tg ) {
-         //MATrices (rotate an object over time)
-         glm::mat4 trans = glm::mat4(1.0f);
+      if (tg) {
+         //matrices(rotate an object over time)
+         glm::mat4 trans = glm::mat4(1.0f), projection = glm::mat4(1.0f);
          trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, -0.3f));
          trans = glm::scale(trans, glm::vec3(0.2, 0.3, 0.3));
+         std::pair<int, int> view_point = utils::get_view_point(win);
          trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+         projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
 
          //draw triangles (with two textures)
          tx.use(tx2.ID);
          s3.use();
-         s3.set_matrix4fv("transform", trans);
-         triangle.bind();
-         glDrawArrays(GL_TRIANGLES, 0, 3);
-         glBindVertexArray(0);
-
+         s3.set_matrix4fv("model", trans);
+         s3.set_matrix4fv("view", camera.get_view());
+         s3.set_matrix4fv("projection", projection);
+         cube.draw_buffer(GL_TRIANGLES, 3);
       } 
       if (cb) {
          //draw a cube 
@@ -211,33 +227,84 @@ int main(){
          s4.set_matrix4fv("view", view);
          s4.set_matrix4fv("projection", projection);
          
-         cube.bind();
-         glDrawArrays(GL_TRIANGLES, 0, 36);
-         glBindVertexArray(0);
+         cube.draw_buffer(GL_TRIANGLES, 36);
 
       } 
       if (fl){
          // COORDINATES
          glm::mat4 model, view, projection;
-         model = view = projection = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.4f, 0.0f, 0.0f));
-         model = glm::rotate(model, glm::radians(-65.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-         model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.0f));
-         view = camera.get_view(); 
-         projection = glm::perspective(glm::radians(fov), (float)WIDTH/HEIGHT, 0.1f, 100.f);
+         float offset_x = -0.4f, offset_y = 0.0f, 
+               offset_z = -0.5f, offset_z2 = -0.2f;
+         for (int i = 0; i != 10; i++){ 
+            for (int j = 0; j != 10; j++){
+               model = view = projection = glm::mat4(1.0f);
+               offset_y += 0.9f;
+               model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+               model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+               model = glm::translate(model, glm::vec3(offset_x, offset_y, 0.0f));
+               model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.0f));
+               view = camera.get_view(); 
+               std::pair<int, int> view_point = utils::get_view_point(win);
+               projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
 
-         // draw floor 
-         tx.use();
-         s4.use();
-         s4.set_float("move", move);
-         s4.set_matrix4fv("model", model);
-         s4.set_matrix4fv("view", view);
-         s4.set_matrix4fv("projection", projection);
-         floor.bind();
-         glDrawElements(GL_TRIANGLES, LEN(indices1), GL_UNSIGNED_INT, 0);
-         glBindVertexArray(0);
+               // draw floor 
+               tx.use();
+               s4.use();
+               s4.set_float("move", move);
+               s4.set_matrix4fv("model", model);
+               s4.set_matrix4fv("view", view);
+               s4.set_matrix4fv("projection", projection);
+               floor.draw(GL_TRIANGLES, LEN(indices1));
+            }
+            offset_y=0.0f;
+            offset_x+=0.9f;
+         }
+         offset_x = -0.4f;
+         for (int j = 0; j != 5; j++){
+            for (int i = 0; i != 10; i++){ 
+               model = view = projection = glm::mat4(1.0f);
+               if (j == 2){
+                  model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z-9));
+               } else if (j == 3 || j == 4){
+                  model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0f, 0.0f));
+                  if (j == 4){
+                     model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z2+8));
+                  } else model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z2));
+               } else
+                  model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z));
+
+               model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.0f));
+               view = camera.get_view(); 
+               std::pair<int, int> view_point = utils::get_view_point(win);
+               projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
+
+               // draw walls
+               tx3.use();
+               s4.use();
+               s4.set_float("move", move);
+               s4.set_matrix4fv("model", model);
+               s4.set_matrix4fv("view", view);
+               s4.set_matrix4fv("projection", projection);
+               floor.draw(GL_TRIANGLES, LEN(indices1));
+               offset_x+=0.9f;
+            }
+            offset_x = -0.4f;
+            if (j == 3 || j == 4) offset_x = 1.0f;
+
+         }
       }
 
+      if (hands){
+         glm::mat4 model = glm::mat4(1.0f);;
+         model = glm::translate(model, glm::vec3(0.5f, -0.5f, 0.0));
+         model = glm::scale(model, glm::vec3(1.0, 1.0, 0.0));
+
+         hand_texture.use();
+         hand_shader.use();
+         hand_shader.set_matrix4fv("model", model);
+         hand.draw(GL_TRIANGLES, LEN(indices1));
+
+      }
       #ifdef DEBUG_MODE
       if (Input::is_pressed(win, GLFW_KEY_C)){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

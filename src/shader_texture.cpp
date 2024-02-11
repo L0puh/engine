@@ -86,17 +86,18 @@ void Shader::set_matrix4fv(const char name[], glm::mat4 data){
 //                    TEXTURE                         //
 /******************************************************/
 
-Texture::Texture(const char texture_path[], int img_type){
+Texture::Texture(const char texture_path[], int img_type, GLenum mode){
    glGenTextures(1, &ID);
    glBindTexture(GL_TEXTURE_2D, ID);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode);
 
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
    int width, height, color_channels;
 
+   stbi_set_flip_vertically_on_load(1);
    unsigned char *data = stbi_load(texture_path, &width, &height, &color_channels, 0);
    if (!data){ 
       utils::error(texture_path, "couldn't load data");
@@ -111,7 +112,6 @@ Texture::Texture(const char texture_path[], int img_type){
          glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
          break;
    }
-
    glGenerateMipmap(GL_TEXTURE_2D);
    stbi_image_free(data);
    utils::log(texture_path,"load texture");
@@ -132,5 +132,17 @@ void Texture::use(uint ID2){
 }
 void Texture::use(){
    glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+/******************************************************/
+
+void check_status_shader_program(uint shader_program){
+   int res; 
+   char info[512];
+   glGetProgramiv(shader_program, GL_LINK_STATUS, &res);
+   if (!res){
+      glGetProgramInfoLog(shader_program, 512, NULL, info);
+      utils::error("shaders", info);
+   } else utils::log("linked shader program", std::to_string(shader_program));
 }
 

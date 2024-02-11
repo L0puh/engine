@@ -61,7 +61,7 @@ class Shader {
 
 class Texture {
    public:
-      Texture(const char texture_path[], int type);
+      Texture(const char texture_path[], int type, GLenum mode);
       ~Texture();
    public:
       uint ID;
@@ -134,6 +134,8 @@ class Vertex_array {
       ~Vertex_array();
    public:
       void bind();
+      void draw(GLenum mode, size_t size);
+      void draw_buffer(GLenum mode, size_t size);
       void create_VBO(const void* data, size_t size);
       void create_EBO(const void* data, size_t size);
       void add_buffer(Layout& layout);
@@ -141,6 +143,8 @@ class Vertex_array {
    private: 
       uint VAO, VBO, EBO; 
 };
+
+/*******************************************************************************/
 
 
 #endif

@@ -36,17 +36,6 @@ GLFWwindow* init_window(const int WIDTH, const int HEIGHT){
 }
 
 
-void check_status_shader_program(uint shader_program){
-   int res; 
-   char info[512];
-   glGetProgramiv(shader_program, GL_LINK_STATUS, &res);
-   if (!res){
-      glGetProgramInfoLog(shader_program, 512, NULL, info);
-      utils::error("shaders", info);
-   } else utils::log("linked shader program", std::to_string(shader_program));
-}
-
-
 /******************************************************/
 //                    INPUT                           //
 /******************************************************/
@@ -110,5 +99,17 @@ void Vertex_array::add_buffer(Layout& layout){
 }
 void Vertex_array::bind(){
    glBindVertexArray(VAO);
+}
+
+void Vertex_array::draw(GLenum mode, size_t size){
+   bind();
+   glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, 0);
+   glBindVertexArray(0);
+}
+
+void Vertex_array::draw_buffer(GLenum mode, size_t size){
+   bind();
+   glDrawArrays(mode, 0, size);
+   glBindVertexArray(0);
 }
 
