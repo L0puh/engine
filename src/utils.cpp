@@ -1,8 +1,10 @@
 #include "utils.h"
+#include "glm/fwd.hpp"
+#include "glm/geometric.hpp"
 #include "imgui/imgui.h"
 
-
 #include <GLFW/glfw3.h>
+
 
 #include <cassert>
 #include <fstream>
@@ -75,6 +77,7 @@ namespace utils{
       ImGuiWindowFlags flags = 0;
       flags |= ImGuiWindowFlags_AlwaysAutoResize;
 
+      bool draw_cube = 0, edit_mode = 1;
       ImGui::Begin("console", 0, flags);
       {
          if (ImGui::IsItemHovered()) hovered = true;
@@ -86,7 +89,14 @@ namespace utils{
          ImGui::Checkbox("Cube:", cb);
          ImGui::Checkbox("Floor:", fl);
          ImGui::Checkbox("FLY:", mode);
+         ImGui::Checkbox("edit_mode:", &edit_mode);
          ImGui::SliderFloat("zoom scale", fov, 0.0f, 100.0f, "%.0f", 0);
+         if (edit_mode && ImGui::IsKeyDown(ImGuiKey_MouseLeft)) {
+            //TODO
+             ImVec2 pos = ImGui::GetMousePos();
+             glm::vec2 pos2 = glm::normalize(glm::vec2(pos.x, pos.y));
+             printf("%f %f\n", pos2.x, pos2.y); 
+           }
       }
       ImGui::End();
    }

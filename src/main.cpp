@@ -312,8 +312,8 @@ int main(){
       camera.proccess_mouse   (win, &x, &y);
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;
-         model = glm::translate(model, glm::vec3(0.5f, -0.5f, 0.0));
-         model = glm::scale(model, glm::vec3(1.0, 1.0, 0.0));
+         model = glm::scale(model, glm::vec3(0.5, 1.0, 0.0));
+         model = glm::translate(model, glm::vec3(1.5f, -0.5f, 0.0));
 
          hand_texture.use();
          hand_shader.use();
