@@ -103,7 +103,7 @@ void Vertex_array::bind(){
 
 void Vertex_array::draw(GLenum mode, size_t size){
    bind();
-   glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, 0);
+   glDrawElements(mode, size, GL_UNSIGNED_INT, 0);
    glBindVertexArray(0);
 }
 

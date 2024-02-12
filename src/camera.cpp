@@ -44,6 +44,9 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Ob
       for (int i = 0; i != size_objects; i++){
          if (collision_detection(objects[i].pos, objects[i].size, forward)){
             object_exists = true;
+            if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
+               pos.z+=0.01;
+            else pos.z-=0.01;
          }
       }
       if (fly && (forward.y > 0 || forward.y < 0))
@@ -60,6 +63,10 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Ob
       for (int i = 0; i != size_objects; i++){
          if (collision_detection(objects[i].pos, objects[i].size, backward)){
             object_exists = true;
+            if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
+               pos.z+=0.01;
+            else 
+               pos.z-=0.01;
          }
        }
       if (fly && (backward.y < 0 || backward.y))
@@ -76,6 +83,9 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Ob
       for (int i = 0; i != size_objects; i++){
          if (collision_detection(objects[i].pos, objects[i].size, left)){
             object_exists = true;
+            if (collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
+               pos.z-=0.01;
+            else pos.z+=0.01;
          }
        }
       if (!object_exists)
@@ -87,6 +97,9 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Ob
       for (int i = 0; i != size_objects; i++){
          if (collision_detection(objects[i].pos, objects[i].size, back)){
             object_exists = true;
+            if (collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
+               pos.z-=0.01;
+            else pos.z+=0.01;
          }
        }
       if (!object_exists)

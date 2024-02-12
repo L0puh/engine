@@ -168,7 +168,8 @@ int main(){
    float fov = FOV;
    float x =  WIDTH / 2.0f, y = HEIGHT / 2.0f;
    bool mode = 1, hovered = 0;
-   Object objects[10];
+   Object objects[100];
+   int objects_size = (10 * 5) + 1;
    Camera camera;
 
 // MAIN LOOP:
@@ -185,11 +186,9 @@ int main(){
       deltatime = current_frame - lastframe;
       lastframe = current_frame;
 
+      objects_size = 0;
       glm::vec3 pos_model = glm::vec3(-0.3, 0.0, -3.0f), size = {1.0, 1.0, 1.0};
-      objects[0] = {pos_model, {size.x/1.5, size.y/1.5, size.z/1.5}};
-      
-      camera.proccess_keyboard(win, deltatime, mode, objects, 1);
-      camera.proccess_mouse(win, &x, &y);
+      objects[objects_size++] = {pos_model, {size.x/1.5, size.y/1.5, size.z/1.5}};
       
       //moving  
       if (Input::is_pressed(win, GLFW_KEY_UP)){
@@ -265,20 +264,28 @@ int main(){
             offset_x+=0.9f;
          }
          offset_x = -0.4f;
+         glm::vec3 model_pos, model_size;
          for (int j = 0; j != 5; j++){
             for (int i = 0; i != 10; i++){ 
                model = view = projection = glm::mat4(1.0f);
                if (j == 2){
-                  model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z-9));
+                  model_pos = {offset_x, -0.1f, offset_z-9};
+                  model = glm::translate(model, model_pos);
                } else if (j == 3 || j == 4){
                   model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0f, 0.0f));
                   if (j == 4){
-                     model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z2+8));
-                  } else model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z2));
-               } else
-                  model = glm::translate(model, glm::vec3(offset_x, -0.1f, offset_z));
-
-               model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.0f));
+                     //FIXME
+                     model_pos = {offset_x, -0.1f, offset_z2+8};
+                     model = glm::translate(model, model_pos);
+                  } else{ 
+                     model_pos = {offset_x, -0.1f, offset_z2};
+                     model = glm::translate(model, model_pos);
+                  }
+               } else{
+                  model_pos = {offset_x, -0.1f, offset_z};
+                  model = glm::translate(model, model_pos);
+               }
+               model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.1f));
                view = camera.get_view(); 
                std::pair<int, int> view_point = utils::get_view_point(win);
                projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
@@ -290,15 +297,19 @@ int main(){
                s4.set_matrix4fv("model", model);
                s4.set_matrix4fv("view", view);
                s4.set_matrix4fv("projection", projection);
+               
+               model_size = {0.9, 0.9, 0.3};
+               objects[objects_size++] = {model_pos, model_size};
                floor.draw(GL_TRIANGLES, LEN(indices1));
                offset_x+=0.9f;
             }
             offset_x = -0.4f;
             if (j == 3 || j == 4) offset_x = 1.0f;
-
          }
       }
 
+      camera.proccess_keyboard(win, deltatime, mode, objects, objects_size);
+      camera.proccess_mouse   (win, &x, &y);
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;
          model = glm::translate(model, glm::vec3(0.5f, -0.5f, 0.0));
