@@ -11,6 +11,8 @@
 
 #define DEBUG_MODE 
 
+
+
 int main(){
 
 // WINDOW: 
@@ -166,7 +168,7 @@ int main(){
    float fov = FOV;
    float x =  WIDTH / 2.0f, y = HEIGHT / 2.0f;
    bool mode = 1, hovered = 0;
-
+   Object objects[10];
    Camera camera;
 
 // MAIN LOOP:
@@ -183,7 +185,10 @@ int main(){
       deltatime = current_frame - lastframe;
       lastframe = current_frame;
 
-      camera.proccess_keyboard(win, deltatime, mode);
+      glm::vec3 pos_model = glm::vec3(-0.3, 0.0, -3.0f), size = {1.0, 1.0, 1.0};
+      objects[0] = {pos_model, {size.x/1.5, size.y/1.5, size.z/1.5}};
+      
+      camera.proccess_keyboard(win, deltatime, mode, objects, 1);
       camera.proccess_mouse(win, &x, &y);
       
       //moving  
@@ -213,6 +218,7 @@ int main(){
          glm::mat4 model, view, projection;
          
          model = view = projection = glm::mat4(1.0f);
+         model = glm::translate(model, pos_model );
          model = glm::rotate(model, (float)glm::radians(rotate), glm::vec3(0.0, 1.0, 0.0f));
          model = glm::scale(model, glm::vec3(1.0, 1.0, 1.0));
          view = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
@@ -226,7 +232,6 @@ int main(){
          s4.set_matrix4fv("model", model);
          s4.set_matrix4fv("view", view);
          s4.set_matrix4fv("projection", projection);
-         
          cube.draw_buffer(GL_TRIANGLES, 36);
 
       } 

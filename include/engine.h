@@ -75,6 +75,10 @@ enum modes{
    WALK,
 };
 
+struct Object {
+   glm::vec3 pos;
+   glm::vec3 size;
+};
 
 class Camera {
    public: 
@@ -87,7 +91,7 @@ class Camera {
             float yaw = YAW, float pitch = PITCH, int mode = FLY);
       void update_vectors();
       glm::mat4 get_view();
-      void proccess_keyboard(GLFWwindow *window, float deltatime, bool mode);
+      void proccess_keyboard(GLFWwindow *window, float deltatime, bool mode, Object objects[], size_t size_objects);
       void proccess_mouse(GLFWwindow *window, float *last_x, float *last_y);
       static void zoom(float scale, float *fov);
 

@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "glm/geometric.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
@@ -27,34 +28,71 @@ void Camera::update_vectors(){
    up    = glm::normalize(glm::cross(right, front));
 }
 
-void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool mode){
+bool collision_detection(glm::vec3 pos, glm::vec3 size, glm::vec3 pos2){
+   bool
+   coll_x = pos.x + size.x >= pos2.x && pos.x - size.x <= pos2.x,
+   coll_y = pos.y + size.y >= pos2.y && pos.y - size.y <= pos2.y,
+   coll_z = pos.z + size.z >= pos2.z && pos.z - size.z <= pos2.z;
+   return coll_x && coll_y && coll_z;
+}
+
+void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Object objects[], size_t size_objects){
    float velocity = speed * deltatime;
+   bool object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_W)){
       glm::vec3 forward = pos + (velocity * front);
-      if (mode && (forward.y > 0 || forward.y < 0))
+      for (int i = 0; i != size_objects; i++){
+         if (collision_detection(objects[i].pos, objects[i].size, forward)){
+            object_exists = true;
+         }
+      }
+      if (fly && (forward.y > 0 || forward.y < 0))
          pos = forward;
-      else if (forward.y > 0 || forward.y < 0){
+      else if ((forward.y > 0 || forward.y < 0) && !object_exists){
          forward.y = 0;
          pos = forward;
-      } else pos = forward;
+      } else if (!object_exists) pos = forward;
       
    }
+   object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_S)){
       glm::vec3 backward = pos - (velocity * front);
-      if (mode && (backward.y < 0||backward.y))
+      for (int i = 0; i != size_objects; i++){
+         if (collision_detection(objects[i].pos, objects[i].size, backward)){
+            object_exists = true;
+         }
+       }
+      if (fly && (backward.y < 0 || backward.y))
          pos = backward;
-      else if (backward.y < 0 || backward.y > 0 ){
+      else if ((backward.y < 0 || backward.y > 0) && !object_exists){
          backward.y = 0;
          pos = backward;
-      } else pos = backward;
+      } else if (!object_exists) pos = backward;
 
    }
+   object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_A)){
-      pos -= glm::normalize(glm::cross(front, up)) * velocity;
+      glm::vec3 left = pos - glm::normalize(glm::cross(front, up)) * velocity;
+      for (int i = 0; i != size_objects; i++){
+         if (collision_detection(objects[i].pos, objects[i].size, left)){
+            object_exists = true;
+         }
+       }
+      if (!object_exists)
+         pos = left;
    }
+   object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_D)){
-      pos += glm::normalize(glm::cross(front, up)) * velocity;
+      glm::vec3 back = pos + glm::normalize(glm::cross(front, up)) * velocity;
+      for (int i = 0; i != size_objects; i++){
+         if (collision_detection(objects[i].pos, objects[i].size, back)){
+            object_exists = true;
+         }
+       }
+      if (!object_exists)
+         pos = back;
    }
+   object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_M)){
       mode = WALK;
    }
