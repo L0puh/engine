@@ -1,6 +1,5 @@
 #include "utils.h"
 #include "glm/fwd.hpp"
-#include "glm/geometric.hpp"
 #include "imgui/imgui.h"
 
 #include <GLFW/glfw3.h>

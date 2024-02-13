@@ -172,10 +172,11 @@ int main(){
    Object objects[100];
    int objects_size = (10 * 5) + 1;
    Camera camera;
-   Renderer cube_renderer(GL_TRIANGLES, &cube, &s4, &tx, 36, BUFFER),
-            triangle_renderer(GL_TRIANGLES, &triangle, &s3, &tx2, 3, BUFFER);
-
-   glm::vec3 pos_model = glm::vec3(-0.3, 0.0, -3.0f), size = {1.0, 1.0, 1.0}, cube_pos;
+  
+   Renderer renderer;
+   renderer.add_object("cube", GL_TRIANGLES, &cube, &s4, &tx, 36, BUFFER);
+   renderer.add_object("triangle", GL_TRIANGLES, &triangle, &s4, &tx2, 3, BUFFER);
+   glm::vec3 size = {1.0, 1.0, 1.0}, cube_pos;
    
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
@@ -190,9 +191,6 @@ int main(){
       float current_frame = glfwGetTime();
       deltatime = current_frame - lastframe;
       lastframe = current_frame;
-
-      objects_size = 0;
-      objects[objects_size++] = {cube_pos, {size.x/1.5, size.y/1.5, size.z/1.5}};
       
       //moving  
       if (Input::is_pressed(win, GLFW_KEY_UP)){
@@ -206,26 +204,28 @@ int main(){
          std::pair<int, int> view_point = utils::get_view_point(win);
          trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
          projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
+         renderer.transform_object("triangle", trans, camera.get_view(), projection, {glm::vec3(0.3f), glm::vec3(0.3f)});
+         renderer.draw("triangle");
 
-         triangle_renderer.draw(trans, camera.get_view(), projection);
       } 
       if (cb) {
          //draw a cube 
          
-         glm::mat4 model, view, projection;
-         model = view = projection = glm::mat4(1.0f);
+         glm::mat4 model, projection;
+         model = projection = glm::mat4(1.0f);
          model = glm::translate(model, cube_pos);
          model = glm::rotate(model, (float)glm::radians(rotate), glm::vec3(0.0, 1.0, 0.0f));
          model = glm::scale(model, glm::vec3(1.0, 1.0, 1.0));
-         view = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
+
          std::pair<int, int> view_point = utils::get_view_point(win);
          projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
-         cube_renderer.draw(model, view, projection);
+         renderer.transform_object("cube", model, camera.get_view(), projection, {cube_pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
+         renderer.draw("cube");
 
       } 
       if (fl) draw_scene(win, &fov, &camera, &tx, &tx3, &s4, &floor, LEN(indices1));
 
-      camera.proccess_keyboard(win, deltatime, mode, objects, objects_size);
+      camera.proccess_keyboard(win, deltatime, mode, renderer.get_objects());
       camera.proccess_mouse   (win, &x, &y);
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;

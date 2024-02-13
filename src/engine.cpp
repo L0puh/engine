@@ -192,20 +192,41 @@ void Vertex_array::draw_buffer(GLenum mode, size_t size){
 //           (just a prototype for now)               //
 /******************************************************/
 
+void Renderer::transform_object(std::string label, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Object obj){
+   if (entities.find(label) == 0) utils::error("no object found", label);
+   entities[label].pos = {model, view, projection};
+   entities[label].obj = obj;
+}
+void Renderer::add_object(std::string label, GLenum mode, Vertex_array *buffer, Shader *sh, Texture *tx, size_t size, Types type){
+   if (entities.find(label) != 0){ 
+      utils::error("object exists", label); 
+      return;
+   }
+   Entity new_entity {mode, buffer, sh, tx, type, size};
+   entities[label] = new_entity;
+   utils::log("add new entity", label);
+}
 
-Renderer::Renderer(GLenum mode, Vertex_array *buffer, Shader *sh, Texture *tx, size_t size, Types type):
-   mode(mode), buffer(buffer), shader(sh), texture(tx), size(size), type(type){}
+Renderer::Renderer(){}
 
-void Renderer::draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection){
-   
-   texture->use();
-   shader->use();
-   shader->set_matrix4fv("model", model);
-   shader->set_matrix4fv("view", view);
-   shader->set_matrix4fv("projection", projection);
+std::vector<Object> Renderer::get_objects(){
+   std::vector<Object> objects;
+   for (auto& it: entities){
+      objects.push_back(it.second.obj);
+   }
+   return objects;
+}
 
-   if      (type == BUFFER) buffer->draw_buffer(mode, size);
-   else if (type == INDICES) buffer->draw(mode, size);
+void Renderer::draw(std::string label){
+   if (entities.find(label) == 0) utils::error("no object found", label);
+   Entity obj = entities[label]; 
+   obj.texture->use();
+   obj.shader->use();
+   obj.shader->set_matrix4fv("model", obj.pos.model);
+   obj.shader->set_matrix4fv("view", obj.pos.view);
+   obj.shader->set_matrix4fv("projection", obj.pos.projection);
 
+   if      (obj.type == BUFFER) obj.buffer->draw_buffer(obj.mode, obj.size);
+   else if (obj.type == INDICES) obj.buffer->draw(obj.mode, obj.size);
 }
 

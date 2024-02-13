@@ -36,12 +36,12 @@ bool collision_detection(glm::vec3 pos, glm::vec3 size, glm::vec3 pos2){
    return coll_x && coll_y && coll_z;
 }
 
-void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Object objects[], size_t size_objects){
+void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, std::vector<Object> objects){
    float velocity = speed * deltatime;
    bool object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_W)){
       glm::vec3 forward = pos + (velocity * front);
-      for (int i = 0; i != size_objects; i++){
+      for (int i = 0; i != objects.size(); i++){
          if (collision_detection(objects[i].pos, objects[i].size, forward)){
             object_exists = true;
             if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
@@ -60,7 +60,7 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Ob
    object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_S)){
       glm::vec3 backward = pos - (velocity * front);
-      for (int i = 0; i != size_objects; i++){
+      for (int i = 0; i != objects.size(); i++){
          if (collision_detection(objects[i].pos, objects[i].size, backward)){
             object_exists = true;
             if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
@@ -80,7 +80,7 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Ob
    object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_A)){
       glm::vec3 left = pos - glm::normalize(glm::cross(front, up)) * velocity;
-      for (int i = 0; i != size_objects; i++){
+      for (int i = 0; i != objects.size(); i++){
          if (collision_detection(objects[i].pos, objects[i].size, left)){
             object_exists = true;
             if (collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
@@ -94,7 +94,7 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, Ob
    object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_D)){
       glm::vec3 back = pos + glm::normalize(glm::cross(front, up)) * velocity;
-      for (int i = 0; i != size_objects; i++){
+      for (int i = 0; i != objects.size(); i++){
          if (collision_detection(objects[i].pos, objects[i].size, back)){
             object_exists = true;
             if (collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
