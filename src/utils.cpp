@@ -73,10 +73,9 @@ namespace utils{
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
    }
-   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov){
+   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos){
       ImGuiWindowFlags flags = 0;
       flags |= ImGuiWindowFlags_AlwaysAutoResize;
-
       bool draw_cube = 0, edit_mode = 1;
       ImGui::Begin("console", 0, flags);
       {
@@ -91,12 +90,11 @@ namespace utils{
          ImGui::Checkbox("FLY:", mode);
          ImGui::Checkbox("edit_mode:", &edit_mode);
          ImGui::SliderFloat("zoom scale", fov, 0.0f, 100.0f, "%.0f", 0);
-         if (edit_mode && ImGui::IsKeyDown(ImGuiKey_MouseLeft)) {
-            //TODO
-             ImVec2 pos = ImGui::GetMousePos();
-             glm::vec2 pos2 = glm::normalize(glm::vec2(pos.x, pos.y));
-             printf("%f %f\n", pos2.x, pos2.y); 
-           }
+         if (edit_mode){
+            ImGui::SliderFloat("x", &pos->x, -10.0, 10.0, "%.3f", 0);
+            ImGui::SliderFloat("y", &pos->y, -10.0, 10.0, "%.3f", 0);
+            ImGui::SliderFloat("z", &pos->z, -10.0, 10.0, "%.3f", 0);
+         }
       }
       ImGui::End();
    }

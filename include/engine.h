@@ -13,9 +13,14 @@
 
 #define LEN(x) sizeof(x)/sizeof(x[0])
 
+class Camera;
+class Texture;
+class Shader;
+class Vertex_array;
+
 void check_status_shader_program(uint shader_program);
 GLFWwindow* init_window(const int WIDTH, const int HEIGHT);
-
+void draw_scene(GLFWwindow* window, float *fov, Camera *camera, Texture *tx, Texture *tx2, Shader *sh, Vertex_array *buffer, size_t size);
 
 /*******************************************************************************/
 
@@ -34,7 +39,9 @@ FOV = 55.0f;
 
 enum Types {
    PNG,
-   JPG
+   JPG,
+   BUFFER,
+   INDICES,
 };
 
 class Shader {
@@ -45,6 +52,7 @@ class Shader {
    public:
       uint ID;
       void use();
+      void unuse();
 
       void set_float(const char name[], float x);
       void set_int(const char name[], int x);
@@ -67,6 +75,7 @@ class Texture {
       uint ID;
       void use(uint ID2);
       void use();
+      void unuse();
 };
 
 /*******************************************************************************/
@@ -150,5 +159,18 @@ class Vertex_array {
 
 /*******************************************************************************/
 
+
+class Renderer {
+   Vertex_array *buffer;
+   Shader       *shader;
+   Texture      *texture;
+   Types type;
+   GLenum mode;
+   size_t size;
+   public:
+      Renderer(GLenum mode, Vertex_array *buffer, Shader *sh, Texture *tx, size_t size, enum Types);
+      //TODO: transform model, view, projection
+      void draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection);
+};
 
 #endif

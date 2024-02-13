@@ -1,5 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
+#include "glm/ext/vector_float3.hpp"
 #include <string>
 
 #include <imgui/imgui.h>
@@ -31,7 +32,7 @@ namespace utils{
          ~Debug();
          void new_frame();
          void render();
-         void draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov);
+         void draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos);
          bool is_clicked();
          bool is_hovered();
       private:

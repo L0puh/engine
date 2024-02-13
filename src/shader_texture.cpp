@@ -60,6 +60,9 @@ int Shader::get_location(const char name[]){
 void Shader::use(){
    glUseProgram(ID);
 }
+void Shader::unuse(){
+   glUseProgram(0);
+}
 
 void Shader::set_float(const char name[], float x){
    int location = get_location(name);
@@ -132,6 +135,9 @@ void Texture::use(uint ID2){
 }
 void Texture::use(){
    glBindTexture(GL_TEXTURE_2D, ID);
+}
+void Texture::unuse(){
+   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /******************************************************/
