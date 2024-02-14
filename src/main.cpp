@@ -1,4 +1,5 @@
 #include <cassert>
+#include <string>
 #include <sys/types.h>
 
 #include <glm/glm.hpp>
@@ -33,7 +34,7 @@ int main(){
 
 // SHADERS: 
 
-   Shader s1("../shaders/shader.vert",               "../shaders/shader.frag");             // with uniform
+   Shader s1("../shaders/shader.vert",               "../shaders/shader.frag");            // with uniform
    Shader s2("../shaders/shader.vert",               "../shaders/shader2.frag");    
    Shader s3("../shaders/shader2.vert",              "../shaders/shader_tex.frag");        // with texture
    Shader s4("../shaders/shader_floor.vert",         "../shaders/shader_floor.frag");
@@ -45,6 +46,17 @@ int main(){
    Texture tx2 ("../textures/face.png", PNG, GL_REPEAT);
    Texture tx3 ("../textures/wall2.jpg", JPG, GL_REPEAT);
    Texture hand_texture ("../textures/hand.png", PNG, GL_CLAMP_TO_BORDER);
+
+
+// MAP (0 is empty, 1 is a block)
+   uint map[5][5] = {
+      {1, 0, 1, 1, 1},
+      {1, 0, 0, 0, 1},
+      {1, 0, 1, 0, 0},
+      {1, 0, 0, 0, 1},
+      {1, 0, 1, 1, 1},
+   };
+
 
 // VERTICIES: 
 
@@ -165,18 +177,26 @@ int main(){
    s3.unuse();
 
 //CAMERA:
+   Camera camera;
    float deltatime=0.0f, lastframe=0.0f;
    float fov = FOV;
    float x =  WIDTH / 2.0f, y = HEIGHT / 2.0f;
    bool mode = 1, hovered = 0;
-   Object objects[100];
-   int objects_size = (10 * 5) + 1;
-   Camera camera;
+   
+   glm::vec3 size = {1.0, 1.0, 1.0}, cube_pos;
   
    Renderer renderer;
    renderer.add_object("cube", GL_TRIANGLES, &cube, &s4, &tx, 36, BUFFER);
    renderer.add_object("triangle", GL_TRIANGLES, &triangle, &s4, &tx2, 3, BUFFER);
-   glm::vec3 size = {1.0, 1.0, 1.0}, cube_pos;
+   
+   for (int j = 0; j != 5; j++){
+      for (int i = 0; i != 5; i++){
+         if (map[j][i]) {
+            renderer.add_object(std::to_string(j) + std::to_string(i) + " scene", GL_TRIANGLES, &cube, &s4, &tx3, 36, BUFFER);
+         }
+      }
+   }
+
    
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
@@ -192,18 +212,16 @@ int main(){
       deltatime = current_frame - lastframe;
       lastframe = current_frame;
       
-      //moving  
-      if (Input::is_pressed(win, GLFW_KEY_UP)){
-         rotate++;
-      } 
       if (tg) {
          //matrices(rotate an object over time) 
          glm::mat4 trans = glm::mat4(1.0f), projection = glm::mat4(1.0f);
          trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, -0.3f));
          trans = glm::scale(trans, glm::vec3(0.2, 0.3, 0.3));
-         std::pair<int, int> view_point = utils::get_view_point(win);
          trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+         
+         std::pair<int, int> view_point = utils::get_view_point(win);
          projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
+
          renderer.transform_object("triangle", trans, camera.get_view(), projection, {glm::vec3(0.3f), glm::vec3(0.3f)});
          renderer.draw("triangle");
 
@@ -223,9 +241,33 @@ int main(){
          renderer.draw("cube");
 
       } 
-      if (fl) draw_scene(win, &fov, &camera, &tx, &tx3, &s4, &floor, LEN(indices1));
+      if (fl) {
+         float x_pos = 0.0f;
+         float z_pos = 0.0f;
+         for (int j = 0; j != 5; j++){
+            for (int i = 0; i != 5; i++){
+               if (map[j][i]) {
+                  glm::mat4 model= glm::mat4(1.0f), projection = glm::mat4(1.0f);
+                  glm::vec3 pos = {x_pos, 0.0f, z_pos};
 
+                  std::pair<int, int> view_point = utils::get_view_point(win);
+                  projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
+
+                  model = glm::translate(model, pos);
+                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " scene", model, camera.get_view(), projection, {pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
+                  renderer.draw(std::to_string(j) + std::to_string(i) + " scene");
+               }
+               z_pos += size.z;
+            }
+            x_pos += size.x;
+            z_pos = 0.0f;
+         }
+      }
       camera.proccess_keyboard(win, deltatime, mode, renderer.get_objects());
+      auto obl = renderer.get_objects();
+
+      printf("\n");
+
       camera.proccess_mouse   (win, &x, &y);
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;
@@ -236,8 +278,8 @@ int main(){
          hand_shader.use();
          hand_shader.set_matrix4fv("model", model);
          hand.draw(GL_TRIANGLES, LEN(indices1));
-
       }
+
       #ifdef DEBUG_MODE
       if (Input::is_pressed(win, GLFW_KEY_C)){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

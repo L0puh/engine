@@ -20,7 +20,6 @@ class Vertex_array;
 
 void check_status_shader_program(uint shader_program);
 GLFWwindow* init_window(const int WIDTH, const int HEIGHT);
-void draw_scene(GLFWwindow* window, float *fov, Camera *camera, Texture *tx, Texture *tx2, Shader *sh, Vertex_array *buffer, size_t size);
 
 /*******************************************************************************/
 
