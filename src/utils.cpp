@@ -72,7 +72,7 @@ namespace utils{
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
    }
-   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos){
+   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos, glm::vec3 camera_pos){
       ImGuiWindowFlags flags = 0;
       flags |= ImGuiWindowFlags_AlwaysAutoResize;
       bool draw_cube = 0, edit_mode = 1;
@@ -89,6 +89,7 @@ namespace utils{
          ImGui::Checkbox("FLY:", mode);
          ImGui::Checkbox("edit_mode:", &edit_mode);
          ImGui::SliderFloat("zoom scale", fov, 0.0f, 100.0f, "%.0f", 0);
+         ImGui::Text("CAMERA: %.2f %.2f %.2f", camera_pos.x, camera_pos.y, camera_pos.z);
          if (edit_mode){
             ImGui::SliderFloat("x", &pos->x, -10.0, 10.0, "%.3f", 0);
             ImGui::SliderFloat("y", &pos->y, -10.0, 10.0, "%.3f", 0);

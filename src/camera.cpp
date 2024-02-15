@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "glm/geometric.hpp"
 
+#include <cmath>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 
@@ -36,11 +37,20 @@ bool collision_detection(glm::vec3 pos, glm::vec3 size, glm::vec3 pos2){
    return coll_x && coll_y && coll_z;
 }
 
+bool ground(glm::vec3 pos, glm::vec3 pos2){
+   pos2 = glm::floor(pos2);
+   //FIXME
+   return pos2.x >= pos.x && pos2.x <= pos.x + 1.0f && pos2.z >= pos.x && pos2.z <= pos.z + 1.0f;
+}
+
 void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, std::vector<Object> objects){
    float velocity = speed * deltatime;
    bool object_exists = false;
+
+
    if (Input::is_pressed(window, GLFW_KEY_W)){
       glm::vec3 forward = pos + (velocity * front);
+      if (!fly) forward.y = 0;
       for (int i = 0; i != objects.size(); i++){
          if (collision_detection(objects[i].pos, objects[i].size, forward)){
             object_exists = true;
@@ -48,31 +58,38 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, st
                pos.z+=0.01;
             else pos.z-=0.01;
          }
+         if (ground(objects[i].pos, pos)) {
+            forward.y = objects[i].pos.y + 1.8; 
+         }
       }
-      if (fly && (forward.y > 0 || forward.y < 0))
+      if (fly && forward.y != 0 )
          pos = forward;
-      else if ((forward.y > 0 || forward.y < 0) && !object_exists){
-         forward.y = 0;
+      else if (forward.y != 0 && !object_exists){
          pos = forward;
-      } else if (!object_exists) pos = forward;
+      } 
+      else if (!object_exists) pos = forward;
       
    }
    object_exists = false;
    if (Input::is_pressed(window, GLFW_KEY_S)){
       glm::vec3 backward = pos - (velocity * front);
+      if (!fly) backward.y = 0;
       for (int i = 0; i != objects.size(); i++){
          if (collision_detection(objects[i].pos, objects[i].size, backward)){
             object_exists = true;
+            if (!fly) backward.y = objects[i].pos.y + 0.5;
             if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
                pos.z+=0.01;
             else 
                pos.z-=0.01;
          }
+         if (ground(objects[i].pos, pos)) {
+            backward.y = objects[i].pos.y + 1.8; 
+         }
        }
       if (fly && (backward.y < 0 || backward.y))
          pos = backward;
       else if ((backward.y < 0 || backward.y > 0) && !object_exists){
-         backward.y = 0;
          pos = backward;
       } else if (!object_exists) pos = backward;
 

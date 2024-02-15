@@ -8,6 +8,7 @@
 
 #include "engine.h"
 #include "glm/ext/matrix_transform.hpp"
+#include "imgui/imgui.h"
 #include "utils.h"
 
 #define DEBUG_MODE 
@@ -15,6 +16,7 @@
 
 
 int main(){
+
 
 // WINDOW: 
    GLFWwindow* win =  init_window(WIDTH, HEIGHT);
@@ -50,11 +52,11 @@ int main(){
 
 // MAP (0 is empty, 1 is a block)
    uint map[5][5] = {
-      {1, 0, 1, 1, 1},
-      {1, 0, 0, 0, 1},
-      {1, 0, 1, 0, 0},
-      {1, 0, 0, 0, 1},
-      {1, 0, 1, 1, 1},
+      {0, 0, 1, 1, 1},
+      {0, 0, 0, 0, 1},
+      {0, 0, 1, 0, 0},
+      {0, 0, 0, 0, 1},
+      {0, 0, 1, 1, 1},
    };
 
 
@@ -193,6 +195,8 @@ int main(){
       for (int i = 0; i != 5; i++){
          if (map[j][i]) {
             renderer.add_object(std::to_string(j) + std::to_string(i) + " scene", GL_TRIANGLES, &cube, &s4, &tx3, 36, BUFFER);
+         } else {
+            renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &s4, &tx, LEN(indices1), INDICES );
          }
       }
    }
@@ -244,31 +248,39 @@ int main(){
       if (fl) {
          float x_pos = 0.0f;
          float z_pos = 0.0f;
+         ImGui::Begin("floor", 0, ImGuiWindowFlags_AlwaysAutoResize);
          for (int j = 0; j != 5; j++){
             for (int i = 0; i != 5; i++){
-               if (map[j][i]) {
                   glm::mat4 model= glm::mat4(1.0f), projection = glm::mat4(1.0f);
                   glm::vec3 pos = {x_pos, 0.0f, z_pos};
 
                   std::pair<int, int> view_point = utils::get_view_point(win);
                   projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
 
+               if (map[j][i]) {
                   model = glm::translate(model, pos);
                   renderer.transform_object(std::to_string(j) + std::to_string(i) + " scene", model, camera.get_view(), projection, {pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
                   renderer.draw(std::to_string(j) + std::to_string(i) + " scene");
+               } else {
+                  ImGui::Text("floor: %.2f %.2f %.2f", pos.x, pos.y+0.5f, pos.z);
+                  model = glm::translate(model, {pos.x, pos.y + 0.5f, pos.z});
+                  model = glm::rotate(model, glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f));
+                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " floor", model, camera.get_view(), projection, {{pos.x, pos.y+0.5f, pos.z}, glm::vec3(0.1)});
+                  renderer.draw(std::to_string(j) + std::to_string(i) + " floor");
                }
                z_pos += size.z;
             }
             x_pos += size.x;
             z_pos = 0.0f;
          }
+                  ImGui::End();
       }
       camera.proccess_keyboard(win, deltatime, mode, renderer.get_objects());
       auto obl = renderer.get_objects();
 
-      printf("\n");
 
       camera.proccess_mouse   (win, &x, &y);
+      
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;
          model = glm::scale(model, glm::vec3(0.5, 1.0, 0.0));
@@ -281,9 +293,13 @@ int main(){
       }
 
       #ifdef DEBUG_MODE
+      glm::vec3 camera_pos = camera.pos;
+      ImGui::Begin("camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Text("CAMERA: %.2f %.2f %.2f", camera_pos.x, camera_pos.y, camera_pos.z);
+      ImGui::End();
       if (Input::is_pressed(win, GLFW_KEY_C)){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-         debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos); 
+         debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos); 
       } else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       }
