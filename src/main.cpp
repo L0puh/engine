@@ -15,6 +15,7 @@
 #define DEBUG_MODE 
 
 
+
 int main(){
 
 
@@ -290,29 +291,30 @@ int main(){
          debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos); 
          camera.pos = {2.0f, 9.0f, 2.0f};
          camera.pitch = -90.0f;
-         camera.yaw = -90.0f;
-         if (Input::is_pressed_mouse(win, GLFW_MOUSE_BUTTON_LEFT)) {
+         camera.yaw = -180.0f;
+         if (Input::is_pressed_mouse(win, GLFW_MOUSE_BUTTON_LEFT) && !count) {
             double x_pos, y_pos;
             glfwGetCursorPos(win, &x_pos, &y_pos);
-            // FIXME
-            pos = glm::normalize(glm::vec3(y_pos, 0.0f, x_pos)); 
-            printf("%.4f %.4f\n", pos.x, pos.z);
+            std::pair<int, int> view_point = utils::get_view_point(win);
+            pos = {x_pos, 0.0f, y_pos};
             renderer.add_object(std::to_string(count) + " test", GL_TRIANGLES, &cube, &s4, &tx2, 36, BUFFER);
-            count++;
-
+            count = 1;
          }
       } else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       }
-      for (int i = 0; i < count; i++){
+      if (count) {
          glm::mat4 model, projection;
          model = projection = glm::mat4(1.0f);
-         model = glm::translate(model, pos);
          std::pair<int, int> view_point = utils::get_view_point(win);
          projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
-         renderer.transform_object(std::to_string(i) + " test", model, camera.get_view(), projection, {pos, size});
-         renderer.draw(std::to_string(i) + " test");
+         pos = glm::normalize(pos); //FIXME: normalize over the projection 
+         model = glm::translate(model, pos);
+
+         renderer.transform_object(std::to_string(0) + " test", model, camera.get_view(), projection, {pos, size});
+         renderer.draw(std::to_string(0) + " test");
       }
+
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;
          model = glm::scale(model, glm::vec3(0.5, 1.0, 0.0));
