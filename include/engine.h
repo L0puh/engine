@@ -108,6 +108,7 @@ class Camera {
 
 class Input {
    public:
+      static bool is_pressed_mouse(GLFWwindow* window, int key);
       static bool is_pressed(GLFWwindow* window, int key);
       static void mouse_callback(GLFWwindow *window, double x, double y);      
       static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

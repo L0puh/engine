@@ -58,8 +58,8 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, st
                pos.z+=0.01;
             else pos.z-=0.01;
          }
-         if (ground(objects[i].pos, pos)) {
-            forward.y = objects[i].pos.y + 1.8; 
+         if (!fly && ground(objects[i].pos, pos)) {
+            forward.y = objects[i].pos.y + 0.5; 
          }
       }
       if (fly && forward.y != 0 )
@@ -77,14 +77,13 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, st
       for (int i = 0; i != objects.size(); i++){
          if (collision_detection(objects[i].pos, objects[i].size, backward)){
             object_exists = true;
-            if (!fly) backward.y = objects[i].pos.y + 0.5;
             if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
                pos.z+=0.01;
             else 
                pos.z-=0.01;
          }
-         if (ground(objects[i].pos, pos)) {
-            backward.y = objects[i].pos.y + 1.8; 
+         if (!fly && ground(objects[i].pos, pos)) {
+            backward.y = objects[i].pos.y + 0.5; 
          }
        }
       if (fly && (backward.y < 0 || backward.y))

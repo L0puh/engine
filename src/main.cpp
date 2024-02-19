@@ -8,11 +8,11 @@
 
 #include "engine.h"
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/geometric.hpp"
 #include "imgui/imgui.h"
 #include "utils.h"
 
 #define DEBUG_MODE 
-
 
 
 int main(){
@@ -53,9 +53,9 @@ int main(){
 // MAP (0 is empty, 1 is a block)
    uint map[5][5] = {
       {0, 0, 1, 1, 1},
-      {0, 0, 0, 0, 1},
-      {0, 0, 1, 0, 0},
-      {0, 0, 0, 0, 1},
+      {1, 0, 0, 0, 1},
+      {1, 0, 1, 0, 0},
+      {1, 1, 0, 0, 1},
       {0, 0, 1, 1, 1},
    };
 
@@ -201,7 +201,8 @@ int main(){
       }
    }
 
-   
+  bool target = true; 
+  int count = 0;
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
 
@@ -248,7 +249,6 @@ int main(){
       if (fl) {
          float x_pos = 0.0f;
          float z_pos = 0.0f;
-         ImGui::Begin("floor", 0, ImGuiWindowFlags_AlwaysAutoResize);
          for (int j = 0; j != 5; j++){
             for (int i = 0; i != 5; i++){
                   glm::mat4 model= glm::mat4(1.0f), projection = glm::mat4(1.0f);
@@ -262,10 +262,9 @@ int main(){
                   renderer.transform_object(std::to_string(j) + std::to_string(i) + " scene", model, camera.get_view(), projection, {pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
                   renderer.draw(std::to_string(j) + std::to_string(i) + " scene");
                } else {
-                  ImGui::Text("floor: %.2f %.2f %.2f", pos.x, pos.y+0.5f, pos.z);
-                  model = glm::translate(model, {pos.x, pos.y + 0.5f, pos.z});
+                  model = glm::translate(model, {pos.x, -0.5f,  pos.z});
                   model = glm::rotate(model, glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f));
-                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " floor", model, camera.get_view(), projection, {{pos.x, pos.y+0.5f, pos.z}, glm::vec3(0.1)});
+                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " floor", model, camera.get_view(), projection, {{pos.x, -0.5f, pos.z}, glm::vec3(0.1)});
                   renderer.draw(std::to_string(j) + std::to_string(i) + " floor");
                }
                z_pos += size.z;
@@ -273,14 +272,47 @@ int main(){
             x_pos += size.x;
             z_pos = 0.0f;
          }
-                  ImGui::End();
       }
+      
       camera.proccess_keyboard(win, deltatime, mode, renderer.get_objects());
       auto obl = renderer.get_objects();
 
 
       camera.proccess_mouse   (win, &x, &y);
-      
+      #ifdef DEBUG_MODE
+      glm::vec3 camera_pos = camera.pos;
+      ImGui::Begin("camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Text("CAMERA: %.2f %.2f %.2f", camera_pos.x, camera_pos.y, camera_pos.z);
+      ImGui::End();
+      glm::vec3 pos;
+      if (Input::is_pressed(win, GLFW_KEY_C)){
+         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+         debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos); 
+         camera.pos = {2.0f, 9.0f, 2.0f};
+         camera.pitch = -90.0f;
+         camera.yaw = -90.0f;
+         if (Input::is_pressed_mouse(win, GLFW_MOUSE_BUTTON_LEFT)) {
+            double x_pos, y_pos;
+            glfwGetCursorPos(win, &x_pos, &y_pos);
+            // FIXME
+            pos = glm::normalize(glm::vec3(y_pos, 0.0f, x_pos)); 
+            printf("%.4f %.4f\n", pos.x, pos.z);
+            renderer.add_object(std::to_string(count) + " test", GL_TRIANGLES, &cube, &s4, &tx2, 36, BUFFER);
+            count++;
+
+         }
+      } else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
+         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      }
+      for (int i = 0; i < count; i++){
+         glm::mat4 model, projection;
+         model = projection = glm::mat4(1.0f);
+         model = glm::translate(model, pos);
+         std::pair<int, int> view_point = utils::get_view_point(win);
+         projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
+         renderer.transform_object(std::to_string(i) + " test", model, camera.get_view(), projection, {pos, size});
+         renderer.draw(std::to_string(i) + " test");
+      }
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;
          model = glm::scale(model, glm::vec3(0.5, 1.0, 0.0));
@@ -290,18 +322,6 @@ int main(){
          hand_shader.use();
          hand_shader.set_matrix4fv("model", model);
          hand.draw(GL_TRIANGLES, LEN(indices1));
-      }
-
-      #ifdef DEBUG_MODE
-      glm::vec3 camera_pos = camera.pos;
-      ImGui::Begin("camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
-      ImGui::Text("CAMERA: %.2f %.2f %.2f", camera_pos.x, camera_pos.y, camera_pos.z);
-      ImGui::End();
-      if (Input::is_pressed(win, GLFW_KEY_C)){
-         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-         debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos); 
-      } else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
-         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       }
       debug_console.render(); 
       #endif

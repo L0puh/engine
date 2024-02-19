@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "utils.h"
+#include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
 
@@ -42,6 +43,9 @@ GLFWwindow* init_window(const int WIDTH, const int HEIGHT){
 
 bool Input::is_pressed(GLFWwindow* window, int key){
    return glfwGetKey(window, key) == GLFW_PRESS;
+}
+bool Input::is_pressed_mouse(GLFWwindow* window, int key){
+   return glfwGetMouseButton(window, key) == GLFW_PRESS;
 }
 void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
    switch(key){
@@ -130,7 +134,6 @@ void Renderer::add_object(std::string label, GLenum mode, Vertex_array *buffer, 
    }
    Entity new_entity {mode, buffer, sh, tx, type, size};
    entities[label] = new_entity;
-   utils::log("add new entity", label);
 }
 
 Renderer::Renderer(){}
