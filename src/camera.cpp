@@ -37,10 +37,13 @@ bool collision_detection(glm::vec3 pos, glm::vec3 size, glm::vec3 pos2){
    return coll_x && coll_y && coll_z;
 }
 
-bool ground(glm::vec3 pos, glm::vec3 pos2){
-   pos2 = glm::floor(pos2);
-   //FIXME
-   return pos2.x >= pos.x && pos2.x <= pos.x + 1.0f && pos2.z >= pos.x && pos2.z <= pos.z + 1.0f;
+bool ground(glm::vec3 pos, glm::vec3 size, glm::vec3 camera){
+   bool
+   coll_x = pos.x + size.x >= camera.x && camera.x >= pos.x,
+   coll_y = pos.y < camera.y,
+   coll_z = pos.z + size.z >= camera.z && camera.z >= pos.z;
+   if (coll_z && coll_x) printf("%.3f %.3f - %.3f %.3f\n", pos.x + size.x, pos.z + size.z, camera.x, camera.z);
+   return coll_z && coll_x && coll_y;
 }
 
 void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, std::vector<Object> objects){
@@ -52,14 +55,14 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, st
       glm::vec3 forward = pos + (velocity * front);
       if (!fly) forward.y = 0;
       for (int i = 0; i != objects.size(); i++){
-         if (collision_detection(objects[i].pos, objects[i].size, forward)){
-            object_exists = true;
-            if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
-               pos.z+=0.01;
-            else pos.z-=0.01;
-         }
-         if (!fly && ground(objects[i].pos, pos)) {
-            forward.y = objects[i].pos.y + 0.5; 
+         /* if (collision_detection(objects[i].pos, objects[i].size, forward)){ */
+            /* object_exists = true; */
+            /* if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f})) */
+               /* pos.z+=0.01; */
+            /* else pos.z-=0.01; */
+         /* } */
+         if (!fly && ground(objects[i].pos, objects[i].size, pos)) {
+             forward.y = objects[i].pos.y + 0.7; 
          }
       }
       if (fly && forward.y != 0 )
@@ -82,8 +85,8 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, st
             else 
                pos.z-=0.01;
          }
-         if (!fly && ground(objects[i].pos, pos)) {
-            backward.y = objects[i].pos.y + 0.5; 
+         if (!fly && ground(objects[i].pos, objects[i].size, pos)) {
+            backward.y = objects[i].pos.y + 0.7; 
          }
        }
       if (fly && (backward.y < 0 || backward.y))
@@ -153,10 +156,9 @@ void Camera::proccess_mouse(GLFWwindow *window, float *last_x, float *last_y){
    yaw += offset_x;
    pitch += offset_y;
    
-   if (pitch > 89.0f)   pitch= 89.0f;
+   if (pitch > 89.0f)   pitch = 89.0f;
    if (pitch < -89.0f)  pitch = -89.0f;
 
-   
    glm::vec3 directicion;
    directicion.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
    directicion.y = sin(glm::radians(pitch));
@@ -164,4 +166,4 @@ void Camera::proccess_mouse(GLFWwindow *window, float *last_x, float *last_y){
    front = glm::normalize(directicion);
 }
 
-
+;

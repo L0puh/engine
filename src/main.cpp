@@ -14,11 +14,7 @@
 
 #define DEBUG_MODE 
 
-
-
 int main(){
-
-
 // WINDOW: 
    GLFWwindow* win =  init_window(WIDTH, HEIGHT);
    glEnable(GL_DEPTH_TEST);
@@ -52,12 +48,17 @@ int main(){
 
 
 // MAP (0 is empty, 1 is a block)
-   uint map[5][5] = {
-      {0, 0, 1, 1, 1},
-      {1, 0, 0, 0, 1},
-      {1, 0, 1, 0, 0},
-      {1, 1, 0, 0, 1},
-      {0, 0, 1, 1, 1},
+   uint map[MAP_HEIGHT][MAP_WIDTH] = {
+      {0, 0, 0, 1, 1, 0, 0, 0, 1, 0},
+      {0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+      {0, 0, 0, 1, 1, 0, 0, 0, 0, 1},
+      {0, 0, 0, 1, 0, 0, 0, 1, 1, 0},
+      {0, 0, 0, 1, 1, 0, 0, 1, 0, 1},
+      {0, 0, 0, 1, 1, 0, 0, 0, 0, 1},
+      {0, 0, 0, 0, 1, 0, 1, 1, 0, 1},
+      {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+      {0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
+      {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
    };
 
 
@@ -130,8 +131,8 @@ int main(){
    };
 
    float vertices4[] = {
-     0.5f,  0.5f, 0.0f,    1.0f, 1.0f, // top right      0
-     0.5f, -0.5f, 0.0f,    1.0f, 0.0f, // bottom right   1
+     0.5f,   0.5f,  0.0f,    1.0f, 1.0f, // top right      0
+     0.5f,  -0.5f,  0.0f,    1.0f, 0.0f, // bottom right   1
      -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left    2
      -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left       3
    };
@@ -192,12 +193,12 @@ int main(){
    renderer.add_object("cube", GL_TRIANGLES, &cube, &s4, &tx, 36, BUFFER);
    renderer.add_object("triangle", GL_TRIANGLES, &triangle, &s4, &tx2, 3, BUFFER);
    
-   for (int j = 0; j != 5; j++){
-      for (int i = 0; i != 5; i++){
+   for (int j = 0; j != MAP_HEIGHT; j++){
+      for (int i = 0; i != MAP_WIDTH; i++){
          if (map[j][i]) {
             renderer.add_object(std::to_string(j) + std::to_string(i) + " scene", GL_TRIANGLES, &cube, &s4, &tx3, 36, BUFFER);
          } else {
-            renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &s4, &tx, LEN(indices1), INDICES );
+            renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_LINE_LOOP, &floor, &s4, &tx, LEN(indices1), INDICES );
          }
       }
    }
@@ -250,8 +251,8 @@ int main(){
       if (fl) {
          float x_pos = 0.0f;
          float z_pos = 0.0f;
-         for (int j = 0; j != 5; j++){
-            for (int i = 0; i != 5; i++){
+         for (int j = 0; j != MAP_HEIGHT; j++){
+            for (int i = 0; i != MAP_WIDTH; i++){
                   glm::mat4 model= glm::mat4(1.0f), projection = glm::mat4(1.0f);
                   glm::vec3 pos = {x_pos, 0.0f, z_pos};
 
@@ -263,9 +264,12 @@ int main(){
                   renderer.transform_object(std::to_string(j) + std::to_string(i) + " scene", model, camera.get_view(), projection, {pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
                   renderer.draw(std::to_string(j) + std::to_string(i) + " scene");
                } else {
+                  glm::vec3 sz = {1.0, 0.0, 1.0};
                   model = glm::translate(model, {pos.x, -0.5f,  pos.z});
+                  model = glm::scale(model, sz);
                   model = glm::rotate(model, glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f));
-                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " floor", model, camera.get_view(), projection, {{pos.x, -0.5f, pos.z}, glm::vec3(0.1)});
+
+                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " floor", model, camera.get_view(), projection, {{pos.x, -0.5f, pos.z}, sz});
                   renderer.draw(std::to_string(j) + std::to_string(i) + " floor");
                }
                z_pos += size.z;
@@ -318,7 +322,7 @@ int main(){
       if (hands){
          glm::mat4 model = glm::mat4(1.0f);;
          model = glm::scale(model, glm::vec3(0.5, 1.0, 0.0));
-         model = glm::translate(model, glm::vec3(1.5f, -0.5f, 0.0));
+         model = glm::translate(model, glm::vec3(1.5f, -0.5f, 0.0f));
 
          hand_texture.use();
          hand_shader.use();

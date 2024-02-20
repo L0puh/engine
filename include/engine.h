@@ -25,7 +25,9 @@ GLFWwindow* init_window(const int WIDTH, const int HEIGHT);
 
 const int 
 WIDTH  = 300,
-HEIGHT = 300;
+HEIGHT = 300,
+MAP_WIDTH  = 10,
+MAP_HEIGHT = 10;
 
 const float 
 SPEED = 2.5f, 
