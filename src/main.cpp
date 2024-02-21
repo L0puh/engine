@@ -37,6 +37,7 @@ int main(){
    Shader s2("../shaders/shader.vert",               "../shaders/shader2.frag");    
    Shader s3("../shaders/shader2.vert",              "../shaders/shader_tex.frag");        // with texture
    Shader s4("../shaders/shader_floor.vert",         "../shaders/shader_floor.frag");
+   Shader s5("../shaders/shader_color.vert",         "../shaders/shader.frag");
    Shader hand_shader("../shaders/shader_hand.vert", "../shaders/shader_hand.frag");
 
 // TEXTURES:
@@ -174,7 +175,7 @@ int main(){
    glClearColor(0.25f, 0.4f, 0.5f, 1.0f);
    float rotate = 0;
 
-   bool tg = 0, cb = 1, fl= 1, hands = 1;
+   bool tg=0, cb=0, fl=0, hands = 1;
    s3.use();
    s3.set_int("my_texture", 0);
    s3.set_int("my_texture2", 1);
@@ -203,8 +204,12 @@ int main(){
       }
    }
 
-  bool target = true; 
-  int count = 0;
+   renderer.add_object("obj", GL_TRIANGLES, &cube, &s2, &tx, 36, BUFFER);
+   renderer.add_object("light", GL_TRIANGLES, &cube, &s5, nullptr, 36, BUFFER);
+   bool target = true; 
+   int count = 0;
+   glm::vec3 obj_color = {0.3, 0.0, 0.2};
+   glm::vec3 light_color = {1.0, 1.0, 1.0};
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
 
@@ -268,7 +273,7 @@ int main(){
                   model = glm::translate(model, {pos.x, -0.5f,  pos.z});
                   model = glm::scale(model, sz);
                   model = glm::rotate(model, glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f));
-
+      
                   renderer.transform_object(std::to_string(j) + std::to_string(i) + " floor", model, camera.get_view(), projection, {{pos.x, -0.5f, pos.z}, sz});
                   renderer.draw(std::to_string(j) + std::to_string(i) + " floor");
                }
@@ -278,12 +283,44 @@ int main(){
             z_pos = 0.0f;
          }
       }
-      
+      // light
+      ImGui::Begin("##", 0, 0);
+      {
+         glm::mat4 model, projection;
+         model = projection = glm::mat4(1.0f);
+         model = glm::translate(model, {0.0f, 0.0f, 0.0f});
+         std::pair<int, int> view_point = utils::get_view_point(win);
+         projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
+         renderer.transform_object("obj", model, camera.get_view(), projection, {cube_pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
+         
+         
+         ImGui::Text("edit color:");
+         float col[3] =  {light_color.x, light_color.y, light_color.z}; 
+         float col2[3] = {obj_color.x, obj_color.y, obj_color.z};
+         ImGui::ColorEdit3("light", col);
+         ImGui::ColorEdit3("object", col2);
+         light_color = {col[0], col[1], col[2]};
+         obj_color = {col2[0], col2[1], col2[2]};
+
+         s2.use();
+         s2.set_vec3("obj_color",  obj_color);
+         s2.set_vec3("light_color", light_color) ;
+         s5.use();
+         s5.set_vec3("color", light_color) ;
+         
+         model = glm::mat4(1.0f);
+         model = glm::scale(model, {0.3f, 0.3f, 0.3f});
+         model = glm::translate(model, {0.0f, 4.0f, 0.0f});
+         renderer.transform_object("light", model, camera.get_view(), projection, {cube_pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
+         
+         renderer.draw("obj");
+         renderer.draw("light");
+      }
+      ImGui::End();
+
       camera.proccess_keyboard(win, deltatime, mode, renderer.get_objects());
       auto obl = renderer.get_objects();
-
-
-      camera.proccess_mouse   (win, &x, &y);
+      camera.proccess_mouse(win, &x, &y);
       #ifdef DEBUG_MODE
       glm::vec3 camera_pos = camera.pos;
       ImGui::Begin("camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
@@ -293,9 +330,9 @@ int main(){
       if (Input::is_pressed(win, GLFW_KEY_C)){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
          debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos); 
-         camera.pos = {2.0f, 9.0f, 2.0f};
-         camera.pitch = -90.0f;
-         camera.yaw = -180.0f;
+         /* camera.pos = {2.0f, 9.0f, 2.0f}; */
+         /* camera.pitch = -90.0f; */
+         /* camera.yaw = -180.0f; */
          if (Input::is_pressed_mouse(win, GLFW_MOUSE_BUTTON_LEFT) && !count) {
             double x_pos, y_pos;
             glfwGetCursorPos(win, &x_pos, &y_pos);
@@ -305,9 +342,10 @@ int main(){
             count = 1;
          }
       } else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
-         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+         //FIXME: fix camera pitch 
+         /* glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */
       }
-      if (count) {
+      if (count && false) {
          glm::mat4 model, projection;
          model = projection = glm::mat4(1.0f);
          std::pair<int, int> view_point = utils::get_view_point(win);

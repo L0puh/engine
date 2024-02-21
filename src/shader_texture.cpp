@@ -75,6 +75,11 @@ void Shader::set_int(const char name[], int x){
    glUniform1i(location, x); 
 }
 
+void Shader::set_vec3(const char name[], glm::vec3 vec){
+   int location = get_location(name);
+   glUniform3f(location, vec.x, vec.y, vec.z);
+}
+
 void Shader::set_vec4(const char name[], glm::vec4 vec){
    int location = get_location(name);
    glUniform4f(location, vec.x, vec.y, vec.z, vec.w);

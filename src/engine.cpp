@@ -132,7 +132,7 @@ void Renderer::add_object(std::string label, GLenum mode, Vertex_array *buffer, 
       utils::error("object exists", label); 
       return;
    }
-   Entity new_entity {mode, buffer, sh, tx, type, size};
+   Entity new_entity{mode, buffer, sh, tx, type, size};
    entities[label] = new_entity;
 }
 
@@ -149,7 +149,7 @@ std::vector<Object> Renderer::get_objects(){
 void Renderer::draw(std::string label){
    if (entities.find(label) == 0) utils::error("no object found", label);
    Entity obj = entities[label]; 
-   obj.texture->use();
+   if (obj.texture != nullptr) obj.texture->use();
    obj.shader->use();
    obj.shader->set_matrix4fv("model", obj.pos.model);
    obj.shader->set_matrix4fv("view", obj.pos.view);

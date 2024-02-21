@@ -56,6 +56,7 @@ class Shader {
       void unuse();
 
       void set_float(const char name[], float x);
+      void set_vec3(const char name[], glm::vec3 vec);
       void set_int(const char name[], int x);
       void set_matrix4fv(const char name[], glm::mat4 data);
       void set_vec4(const char name[], glm::vec4 vec);
