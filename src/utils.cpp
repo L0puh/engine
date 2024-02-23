@@ -72,29 +72,27 @@ namespace utils{
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
    }
-   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos, glm::vec3 camera_pos){
+   void Debug::draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos, glm::vec3 camera_pos, glm::vec3 *color){
       ImGuiWindowFlags flags = 0;
       flags |= ImGuiWindowFlags_AlwaysAutoResize;
-      bool draw_cube = 0, edit_mode = 1;
+      float col[3] = {color->x, color->y, color->z};
       ImGui::Begin("console", 0, flags);
       {
          if (ImGui::IsItemHovered()) hovered = true;
          else hovered = false;
          if (ImGui::IsItemClicked()) clicked = true;
          else clicked = false;
+         ImGui::ColorEdit3("bg color:", col, 0);
+         *color = {col[0], col[1], col[2]};
          ImGui::Text("change:");
-         ImGui::Checkbox("Triangle:", tg);
-         ImGui::Checkbox("Cube:", cb);
-         ImGui::Checkbox("Floor:", fl);
+         ImGui::Checkbox("Triangle:", tg); ImGui::SameLine();
+         ImGui::Checkbox("Cube:", cb); ImGui::SameLine();
+         ImGui::Checkbox("Floor:", fl); ImGui::SameLine();
          ImGui::Checkbox("FLY:", mode);
-         ImGui::Checkbox("edit_mode:", &edit_mode);
          ImGui::SliderFloat("zoom scale", fov, 0.0f, 100.0f, "%.0f", 0);
-         ImGui::Text("CAMERA: %.2f %.2f %.2f", camera_pos.x, camera_pos.y, camera_pos.z);
-         if (edit_mode){
-            ImGui::SliderFloat("x", &pos->x, -10.0, 10.0, "%.3f", 0);
-            ImGui::SliderFloat("y", &pos->y, -10.0, 10.0, "%.3f", 0);
-            ImGui::SliderFloat("z", &pos->z, -10.0, 10.0, "%.3f", 0);
-         }
+         ImGui::SliderFloat("x", &pos->x, -10.0, 10.0, "%.3f", 0);
+         ImGui::SliderFloat("y", &pos->y, -10.0, 10.0, "%.3f", 0);
+         ImGui::SliderFloat("z", &pos->z, -10.0, 10.0, "%.3f", 0);
       }
       ImGui::End();
    }

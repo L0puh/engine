@@ -32,7 +32,7 @@ namespace utils{
          ~Debug();
          void new_frame();
          void render();
-         void draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos, glm::vec3 camera_pos);
+         void draw(bool *tg, bool *cb, bool *fl, bool *mode, float *fov, glm::vec3 *pos, glm::vec3 camera_pos, glm::vec3 *color);
          bool is_clicked();
          bool is_hovered();
       private:

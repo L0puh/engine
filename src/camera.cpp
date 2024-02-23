@@ -55,12 +55,12 @@ void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, st
       glm::vec3 forward = pos + (velocity * front);
       if (!fly) forward.y = 0;
       for (int i = 0; i != objects.size(); i++){
-         /* if (collision_detection(objects[i].pos, objects[i].size, forward)){ */
-            /* object_exists = true; */
-            /* if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f})) */
-               /* pos.z+=0.01; */
-            /* else pos.z-=0.01; */
-         /* } */
+         if (collision_detection(objects[i].pos, objects[i].size, forward)){
+            object_exists = true;
+            if (!collision_detection(objects[i].pos, objects[i].size, {pos.x, pos.y, pos.z+0.01f}))
+               pos.z+=0.01;
+            else pos.z-=0.01;
+         }
          if (!fly && ground(objects[i].pos, objects[i].size, pos)) {
              forward.y = objects[i].pos.y + 0.7; 
          }

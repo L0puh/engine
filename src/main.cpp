@@ -2,6 +2,8 @@
 #include <string>
 #include <sys/types.h>
 
+#include "verticies.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -17,7 +19,7 @@
 int main(){
 // WINDOW: 
    GLFWwindow* win =  init_window(WIDTH, HEIGHT);
-   glEnable(GL_DEPTH_TEST);
+glEnable(GL_DEPTH_TEST);
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
@@ -63,86 +65,6 @@ int main(){
    };
 
 
-// VERTICIES: 
-
-   float vertices_cube[] = {
-     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-   };
-
-   float vertices[] = {
-   //  x     y       z    colors 
-      0.0f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  
-      0.9f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 
-      0.45f, 0.5f, 0.0f,  0.0f, 0.0f, 1.0f   
-   };
-
-   float vertices3[] = {
-      // x   y     z          texture
-       0.0f, 0.8f, 0.0f,   2.0f, 0.0f,
-    -0.8f,-0.8f, 0.0f,     0.0f, 0.0f,
-     0.8f,-0.8f, 0.0f,     0.0f, 2.0f,
-   };
-
-   float hand_verticies[] = {
-      // x   y     z          texture
-     0.5f,  0.5f, 0.0f,    1.0f, 1.0f, // top right      0
-     0.5f, -0.5f, 0.0f,    1.0f, 0.0f, // bottom right   1
-     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left    2
-     -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left       3
-   };
-
-   float vertices4[] = {
-     0.5f,   0.5f,  0.0f,    1.0f, 1.0f, // top right      0
-     0.5f,  -0.5f,  0.0f,    1.0f, 0.0f, // bottom right   1
-     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left    2
-     -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left       3
-   };
-
-   
-   uint indices1[] = {
-     0, 1, 3, 
-     1, 2, 3  
-   };
   
 // BUFFERS: 
    Layout data;
@@ -157,22 +79,33 @@ int main(){
   
    //HAND 
    Vertex_array hand;
-   hand.create_VBO(vertices4, sizeof(hand_verticies));
+   hand.create_VBO(hand_verticies, sizeof(hand_verticies));
    hand.create_EBO(indices1, sizeof(indices1));
    hand.add_buffer(data);
+
    //FLOOR 
+
+   Layout data_cube;
+   data_cube.pushf(3); // position
+   data_cube.pushf(2); // texture
+   data_cube.pushf(3); // normal
+   
    Vertex_array floor;
    floor.create_VBO(vertices4, sizeof(vertices4));
    floor.create_EBO(indices1, sizeof(indices1));
-   floor.add_buffer(data);
+   floor.add_buffer(data_cube);
 
 
-   // ANOTHER CUBE 
+   // CUBES
    Vertex_array cube;
    cube.create_VBO(vertices_cube, sizeof(vertices_cube));
    cube.add_buffer(data); 
 
-   glClearColor(0.25f, 0.4f, 0.5f, 1.0f);
+
+   Vertex_array cube2;
+   cube2.create_VBO(vertices_cube2, sizeof(vertices_cube2));
+   cube2.add_buffer(data_cube); 
+
    float rotate = 0;
 
    bool tg=0, cb=0, fl=0, hands = 1;
@@ -197,19 +130,21 @@ int main(){
    for (int j = 0; j != MAP_HEIGHT; j++){
       for (int i = 0; i != MAP_WIDTH; i++){
          if (map[j][i]) {
-            renderer.add_object(std::to_string(j) + std::to_string(i) + " scene", GL_TRIANGLES, &cube, &s4, &tx3, 36, BUFFER);
+            renderer.add_object(std::to_string(j) + std::to_string(i) + " scene", GL_TRIANGLES, &cube2, &s2, &tx3, 36, BUFFER);
          } else {
-            renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_LINE_LOOP, &floor, &s4, &tx, LEN(indices1), INDICES );
+            renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &s2, &tx, LEN(indices1), INDICES);
          }
       }
    }
 
-   renderer.add_object("obj", GL_TRIANGLES, &cube, &s2, &tx, 36, BUFFER);
-   renderer.add_object("light", GL_TRIANGLES, &cube, &s5, nullptr, 36, BUFFER);
-   bool target = true; 
+   renderer.add_object("obj",   GL_TRIANGLES, &cube2, &s2, &tx, 36, BUFFER);
+   renderer.add_object("light", GL_TRIANGLES, &cube,  &s5, nullptr, 36, BUFFER);
+   bool target = true, move_light = false;
    int count = 0;
-   glm::vec3 obj_color = {0.3, 0.0, 0.2};
+   glm::vec3 obj_color = {0.6, 0.0, 0.3};
+   glm::vec3 light_pos = {-10.0, 10.0, 0.0};
    glm::vec3 light_color = {1.0, 1.0, 1.0};
+   glm::vec3 color = {1.0f, 1.0f, 1.0f};
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
 
@@ -284,7 +219,7 @@ int main(){
          }
       }
       // light
-      ImGui::Begin("##", 0, 0);
+      ImGui::Begin("edit color", 0, 0);
       {
          glm::mat4 model, projection;
          model = projection = glm::mat4(1.0f);
@@ -299,18 +234,30 @@ int main(){
          float col2[3] = {obj_color.x, obj_color.y, obj_color.z};
          ImGui::ColorEdit3("light", col);
          ImGui::ColorEdit3("object", col2);
+         ImGui::Checkbox("move light:",  &move_light);
          light_color = {col[0], col[1], col[2]};
          obj_color = {col2[0], col2[1], col2[2]};
+         if (!move_light) { 
+            float pos[3] = {light_pos.x, light_pos.y, light_pos.z};
+            ImGui::SliderFloat3("pos_ligh", pos, -20.0f, 20.0, "%.5f", 0);
+            light_pos = {pos[0], pos[1], pos[2]};
+         } else {
+            light_pos.x = 1.0f + cos(glfwGetTime()) * 8.0f;
+            light_pos.z = cos(glfwGetTime()) * 5.0f;
+            light_pos.y = sin(glfwGetTime() / 2.0f) * 5.0f;
+         }
 
          s2.use();
          s2.set_vec3("obj_color",  obj_color);
          s2.set_vec3("light_color", light_color) ;
+         s2.set_vec3("light_pos", light_pos);
+         s2.set_vec3("view_pos", camera.pos);
          s5.use();
          s5.set_vec3("color", light_color) ;
          
          model = glm::mat4(1.0f);
          model = glm::scale(model, {0.3f, 0.3f, 0.3f});
-         model = glm::translate(model, {0.0f, 4.0f, 0.0f});
+         model = glm::translate(model, light_pos);
          renderer.transform_object("light", model, camera.get_view(), projection, {cube_pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
          
          renderer.draw("obj");
@@ -329,7 +276,7 @@ int main(){
       glm::vec3 pos;
       if (Input::is_pressed(win, GLFW_KEY_C)){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-         debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos); 
+         debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos, &color); 
          /* camera.pos = {2.0f, 9.0f, 2.0f}; */
          /* camera.pitch = -90.0f; */
          /* camera.yaw = -180.0f; */
@@ -341,10 +288,12 @@ int main(){
             renderer.add_object(std::to_string(count) + " test", GL_TRIANGLES, &cube, &s4, &tx2, 36, BUFFER);
             count = 1;
          }
-      } else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
-         //FIXME: fix camera pitch 
-         /* glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */
+      } 
+      if (Input::is_pressed(win, GLFW_KEY_M)){
+      /* if (!debug_console.is_hovered() || !debug_console.is_clicked()){ */
+         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       }
+      glClearColor(color.x, color.y, color.z, 1.0f);
       if (count && false) {
          glm::mat4 model, projection;
          model = projection = glm::mat4(1.0f);
