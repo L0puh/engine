@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "glm/geometric.hpp"
 
+#include <GLFW/glfw3.h>
 #include <cmath>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
@@ -47,10 +48,9 @@ bool ground(glm::vec3 pos, glm::vec3 size, glm::vec3 camera){
 }
 
 void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, std::vector<Object> objects){
+
    float velocity = speed * deltatime;
    bool object_exists = false;
-
-
    if (Input::is_pressed(window, GLFW_KEY_W)){
       glm::vec3 forward = pos + (velocity * front);
       if (!fly) forward.y = 0;

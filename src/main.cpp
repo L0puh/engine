@@ -52,16 +52,16 @@ glEnable(GL_DEPTH_TEST);
 
 // MAP (0 is empty, 1 is a block)
    uint map[MAP_HEIGHT][MAP_WIDTH] = {
-      {0, 0, 0, 1, 1, 0, 0, 0, 1, 0},
-      {0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+      {6, 0, 0, 1, 1, 0, 0, 0, 1, 0},
+      {6, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+      {6, 0, 2, 0, 1, 0, 0, 0, 0, 1},
+      {6, 0, 0, 1, 0, 0, 0, 1, 1, 0},
+      {6, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+      {6, 0, 0, 1, 1, 0, 0, 0, 0, 1},
+      {6, 0, 0, 0, 0, 0, 1, 1, 0, 1},
+      {6, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+      {6, 0, 0, 1, 0, 0, 1, 0, 0, 1},
       {0, 0, 0, 1, 1, 0, 0, 0, 0, 1},
-      {0, 0, 0, 1, 0, 0, 0, 1, 1, 0},
-      {0, 0, 0, 1, 1, 0, 0, 1, 0, 1},
-      {0, 0, 0, 1, 1, 0, 0, 0, 0, 1},
-      {0, 0, 0, 0, 1, 0, 1, 1, 0, 1},
-      {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-      {0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
-      {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
    };
 
 
@@ -130,7 +130,9 @@ glEnable(GL_DEPTH_TEST);
    for (int j = 0; j != MAP_HEIGHT; j++){
       for (int i = 0; i != MAP_WIDTH; i++){
          if (map[j][i]) {
-            renderer.add_object(std::to_string(j) + std::to_string(i) + " scene", GL_TRIANGLES, &cube2, &s2, &tx3, 36, BUFFER);
+            for (int k = 0; k < map[j][i]; k++){
+               renderer.add_object(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene", GL_TRIANGLES, &cube2, &s2, &tx3, 36, BUFFER);
+            }
          } else {
             renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &s2, &tx, LEN(indices1), INDICES);
          }
@@ -141,10 +143,10 @@ glEnable(GL_DEPTH_TEST);
    renderer.add_object("light", GL_TRIANGLES, &cube,  &s5, nullptr, 36, BUFFER);
    bool target = true, move_light = false;
    int count = 0;
-   glm::vec3 obj_color = {0.6, 0.0, 0.3};
+   glm::vec3 obj_color = {0.9, 0.8, 0.5};
+   glm::vec3 light_color = {0.8, 0.8, 0.7};
    glm::vec3 light_pos = {-10.0, 10.0, 0.0};
-   glm::vec3 light_color = {1.0, 1.0, 1.0};
-   glm::vec3 color = {1.0f, 1.0f, 1.0f};
+   glm::vec3 color = {0.8f, 0.8f, 0.8f};
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
 
@@ -191,18 +193,26 @@ glEnable(GL_DEPTH_TEST);
       if (fl) {
          float x_pos = 0.0f;
          float z_pos = 0.0f;
+         float y_pos;
+         glm::mat4 model= glm::mat4(1.0f), projection = glm::mat4(1.0f);
+         std::pair<int, int> view_point = utils::get_view_point(win);
+
+         projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
          for (int j = 0; j != MAP_HEIGHT; j++){
             for (int i = 0; i != MAP_WIDTH; i++){
-                  glm::mat4 model= glm::mat4(1.0f), projection = glm::mat4(1.0f);
-                  glm::vec3 pos = {x_pos, 0.0f, z_pos};
-
-                  std::pair<int, int> view_point = utils::get_view_point(win);
-                  projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
+               y_pos = 0.0f;
+               glm::vec3 pos = {x_pos, y_pos, z_pos};
+               glm::mat4 model= glm::mat4(1.0f);
 
                if (map[j][i]) {
-                  model = glm::translate(model, pos);
-                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " scene", model, camera.get_view(), projection, {pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
-                  renderer.draw(std::to_string(j) + std::to_string(i) + " scene");
+                  for (int k = 0; k != map[j][i]; k++){
+                     glm::mat4 model= glm::mat4(1.0f);
+                     model = glm::translate(model, {pos.x, y_pos, pos.z});
+                     renderer.transform_object(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene", model, camera.get_view(), projection, {pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
+                     renderer.draw(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene");
+                     y_pos+=1.0;
+                  }
+                   printf("\n");
                } else {
                   glm::vec3 sz = {1.0, 0.0, 1.0};
                   model = glm::translate(model, {pos.x, -0.5f,  pos.z});
@@ -213,11 +223,13 @@ glEnable(GL_DEPTH_TEST);
                   renderer.draw(std::to_string(j) + std::to_string(i) + " floor");
                }
                z_pos += size.z;
+               y_pos = -0.5;
             }
             x_pos += size.x;
             z_pos = 0.0f;
          }
       }
+
       // light
       ImGui::Begin("edit color", 0, 0);
       {
@@ -289,8 +301,8 @@ glEnable(GL_DEPTH_TEST);
             count = 1;
          }
       } 
-      if (Input::is_pressed(win, GLFW_KEY_M)){
-      /* if (!debug_console.is_hovered() || !debug_console.is_clicked()){ */
+      /* if (Input::is_pressed(win, GLFW_KEY_M)){ */
+      else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       }
       glClearColor(color.x, color.y, color.z, 1.0f);
