@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 #include "engine.h"
 #include "glm/ext/matrix_transform.hpp"
@@ -51,18 +52,6 @@ glEnable(GL_DEPTH_TEST);
 
 
 // MAP (0 is empty, 1 is a block)
-   uint map[MAP_HEIGHT][MAP_WIDTH] = {
-      {6, 0, 0, 1, 1, 0, 0, 0, 1, 0},
-      {6, 0, 0, 0, 1, 0, 0, 0, 1, 0},
-      {6, 0, 2, 0, 1, 0, 0, 0, 0, 1},
-      {6, 0, 0, 1, 0, 0, 0, 1, 1, 0},
-      {6, 0, 0, 1, 0, 0, 0, 1, 0, 1},
-      {6, 0, 0, 1, 1, 0, 0, 0, 0, 1},
-      {6, 0, 0, 0, 0, 0, 1, 1, 0, 1},
-      {6, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-      {6, 0, 0, 1, 0, 0, 1, 0, 0, 1},
-      {0, 0, 0, 1, 1, 0, 0, 0, 0, 1},
-   };
 
 
   
@@ -126,7 +115,9 @@ glEnable(GL_DEPTH_TEST);
    Renderer renderer;
    renderer.add_object("cube", GL_TRIANGLES, &cube, &s4, &tx, 36, BUFFER);
    renderer.add_object("triangle", GL_TRIANGLES, &triangle, &s4, &tx2, 3, BUFFER);
-   
+ 
+   std::vector<std::vector<int>> map = renderer.get_map(FILENAME), map_input;
+   map_input = map;
    for (int j = 0; j != MAP_HEIGHT; j++){
       for (int i = 0; i != MAP_WIDTH; i++){
          if (map[j][i]) {
@@ -191,42 +182,22 @@ glEnable(GL_DEPTH_TEST);
 
       } 
       if (fl) {
-         float x_pos = 0.0f;
-         float z_pos = 0.0f;
-         float y_pos;
-         glm::mat4 model= glm::mat4(1.0f), projection = glm::mat4(1.0f);
-         std::pair<int, int> view_point = utils::get_view_point(win);
-
-         projection = glm::perspective(glm::radians(fov), (float)view_point.first/view_point.second, 0.1f, 100.f);
-         for (int j = 0; j != MAP_HEIGHT; j++){
-            for (int i = 0; i != MAP_WIDTH; i++){
-               y_pos = 0.0f;
-               glm::vec3 pos = {x_pos, y_pos, z_pos};
-               glm::mat4 model= glm::mat4(1.0f);
-
-               if (map[j][i]) {
-                  for (int k = 0; k != map[j][i]; k++){
-                     glm::mat4 model= glm::mat4(1.0f);
-                     model = glm::translate(model, {pos.x, y_pos, pos.z});
-                     renderer.transform_object(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene", model, camera.get_view(), projection, {pos, {size.x/1.5, size.y/1.5, size.z/1.5}});
-                     renderer.draw(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene");
-                     y_pos+=1.0;
-                  }
-                   printf("\n");
-               } else {
-                  glm::vec3 sz = {1.0, 0.0, 1.0};
-                  model = glm::translate(model, {pos.x, -0.5f,  pos.z});
-                  model = glm::scale(model, sz);
-                  model = glm::rotate(model, glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f));
-      
-                  renderer.transform_object(std::to_string(j) + std::to_string(i) + " floor", model, camera.get_view(), projection, {{pos.x, -0.5f, pos.z}, sz});
-                  renderer.draw(std::to_string(j) + std::to_string(i) + " floor");
+         renderer.process_map(win, fov, camera, size);
+         ImGui::Begin("map editor", 0, ImGuiWindowFlags_AlwaysAutoResize);
+         {
+            for (int i = 0; i != MAP_HEIGHT; i++){
+               for(int j = 0; j != MAP_WIDTH; j++){
+                  std::string name = std::to_string(i) + std::to_string(j);
+                  ImGui::VSliderInt(name.c_str(), ImVec2(20,20), &map_input[i][j], 0, 10, "%d"); 
+                  ImGui::SameLine();
                }
-               z_pos += size.z;
-               y_pos = -0.5;
+               ImGui::NewLine();
             }
-            x_pos += size.x;
-            z_pos = 0.0f;
+            if (ImGui::Button("save")){
+               renderer.change_map(FILENAME, map_input);
+               //FIXME: rerender objects (k related to height)
+            }
+            ImGui::End();
          }
       }
 
@@ -251,7 +222,7 @@ glEnable(GL_DEPTH_TEST);
          obj_color = {col2[0], col2[1], col2[2]};
          if (!move_light) { 
             float pos[3] = {light_pos.x, light_pos.y, light_pos.z};
-            ImGui::SliderFloat3("pos_ligh", pos, -20.0f, 20.0, "%.5f", 0);
+            ImGui::SliderFloat3("pos_light", pos, -20.0f, 20.0, "%.5f", 0);
             light_pos = {pos[0], pos[1], pos[2]};
          } else {
             light_pos.x = 1.0f + cos(glfwGetTime()) * 8.0f;
@@ -277,9 +248,9 @@ glEnable(GL_DEPTH_TEST);
       }
       ImGui::End();
 
-      camera.proccess_keyboard(win, deltatime, mode, renderer.get_objects());
+      camera.process_keyboard(win, deltatime, mode, renderer.get_objects());
       auto obl = renderer.get_objects();
-      camera.proccess_mouse(win, &x, &y);
+      camera.process_mouse(win, &x, &y);
       #ifdef DEBUG_MODE
       glm::vec3 camera_pos = camera.pos;
       ImGui::Begin("camera", 0, ImGuiWindowFlags_AlwaysAutoResize);

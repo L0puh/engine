@@ -36,6 +36,8 @@ PITCH = 0.0f,
 YAW = -90.0f,
 FOV = 55.0f;
 
+const std::string FILENAME = "map.txt";
+
 /*******************************************************************************/
 
 enum Types {
@@ -102,8 +104,8 @@ class Camera {
             float yaw = YAW, float pitch = PITCH, int mode = FLY);
       void update_vectors();
       glm::mat4 get_view();
-      void proccess_keyboard(GLFWwindow *window, float deltatime, bool mode, std::vector<Object> objects);
-      void proccess_mouse(GLFWwindow *window, float *last_x, float *last_y);
+      void process_keyboard(GLFWwindow *window, float deltatime, bool mode, std::vector<Object> objects);
+      void process_mouse(GLFWwindow *window, float *last_x, float *last_y);
       static void zoom(float scale, float *fov);
 
    private:
@@ -181,11 +183,19 @@ struct Entity {
 class Renderer {
    std::unordered_map<std::string, Entity> entities;
    public:
+      //OBJECTS
       Renderer();
       void transform_object(std::string label, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Object obj);
       void add_object(std::string label, GLenum mode, Vertex_array *buffer, Shader *sh, Texture *tx, size_t size, Types type);
       void draw(std::string label);
       std::vector<Object> get_objects();
+   public:
+      //MAP
+      int process_map(GLFWwindow* win, float fov, Camera camera, glm::vec3 size);
+      std::vector<std::vector<int>> get_map(std::string filename);
+      std::string get_map_string(std::string filename);
+      int change_map(std::string filename, std::vector<std::vector<int>> map);
 };
+
 
 #endif

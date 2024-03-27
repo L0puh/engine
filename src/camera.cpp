@@ -47,7 +47,7 @@ bool ground(glm::vec3 pos, glm::vec3 size, glm::vec3 camera){
    return coll_z && coll_x && coll_y;
 }
 
-void Camera::proccess_keyboard(GLFWwindow *window, float deltatime, bool fly, std::vector<Object> objects){
+void Camera::process_keyboard(GLFWwindow *window, float deltatime, bool fly, std::vector<Object> objects){
 
    float velocity = speed * deltatime;
    bool object_exists = false;
@@ -141,7 +141,7 @@ void Camera::zoom(float zoom_scale, float *fov){
    }
 }
 
-void Camera::proccess_mouse(GLFWwindow *window, float *last_x, float *last_y){
+void Camera::process_mouse(GLFWwindow *window, float *last_x, float *last_y){
    double xpos, ypos;
    glfwGetCursorPos(window, &xpos, &ypos);
    
