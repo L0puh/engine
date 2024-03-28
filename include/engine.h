@@ -189,6 +189,7 @@ class Renderer {
       void add_object(std::string label, GLenum mode, Vertex_array *buffer, Shader *sh, Texture *tx, size_t size, Types type);
       void draw(std::string label);
       std::vector<Object> get_objects();
+      bool object_exists(std::string label);
    public:
       //MAP
       int process_map(GLFWwindow* win, float fov, Camera camera, glm::vec3 size);

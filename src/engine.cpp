@@ -159,3 +159,7 @@ void Renderer::draw(std::string label){
    else if (obj.type == INDICES) obj.buffer->draw(obj.mode, obj.size);
 }
 
+bool Renderer::object_exists(std::string label){
+   return entities.find(label) != 0;
+}
+

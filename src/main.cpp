@@ -132,7 +132,7 @@ glEnable(GL_DEPTH_TEST);
 
    renderer.add_object("obj",   GL_TRIANGLES, &cube2, &s2, &tx, 36, BUFFER);
    renderer.add_object("light", GL_TRIANGLES, &cube,  &s5, nullptr, 36, BUFFER);
-   bool target = true, move_light = false;
+   bool target = true, move_light = false, hide_mouse = true;
    int count = 0;
    glm::vec3 obj_color = {0.9, 0.8, 0.5};
    glm::vec3 light_color = {0.8, 0.8, 0.7};
@@ -185,6 +185,7 @@ glEnable(GL_DEPTH_TEST);
          renderer.process_map(win, fov, camera, size);
          ImGui::Begin("map editor", 0, ImGuiWindowFlags_AlwaysAutoResize);
          {
+         
             for (int i = 0; i != MAP_HEIGHT; i++){
                for(int j = 0; j != MAP_WIDTH; j++){
                   std::string name = std::to_string(i) + std::to_string(j);
@@ -195,7 +196,20 @@ glEnable(GL_DEPTH_TEST);
             }
             if (ImGui::Button("save")){
                renderer.change_map(FILENAME, map_input);
-               //FIXME: rerender objects (k related to height)
+               //FIXME: rerender objects. delete objects?
+                for (int j = 0; j != MAP_HEIGHT; j++){
+                   for (int i = 0; i != MAP_WIDTH; i++){
+                      if (map_input[j][i]) {
+                         for (int k = 0; k < map_input[j][i]; k++){
+                            std::string obj_name = std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene";
+                            if (renderer.object_exists(obj_name)) continue;
+                            renderer.add_object(obj_name, GL_TRIANGLES, &cube2, &s2, &tx3, 36, BUFFER);
+                          }
+                        } else {
+                           renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &s2, &tx, LEN(indices1), INDICES);
+                        }
+                     }
+                  }
             }
             ImGui::End();
          }

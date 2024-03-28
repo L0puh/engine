@@ -34,7 +34,6 @@ int Renderer::process_map(GLFWwindow* win, float fov, Camera camera, glm::vec3 s
                draw(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene");
                y_pos+=1.0;
             }
-             printf("\n");
          } else {
             glm::vec3 sz = {1.0, 0.0, 1.0};
             model = glm::translate(model, {pos.x, -0.5f,  pos.z});
@@ -86,10 +85,8 @@ int Renderer::change_map(std::string filename, std::vector<std::vector<int>> map
     for (int i = 0; i != MAP_HEIGHT; i++){
       for (int j = 0; j != MAP_WIDTH; j++){
          file << map[i][j] << ' ';
-         printf("%d ", map[i][j]);
       }
       file << '\n';
-      putchar('\n');
    }
    file.close();
    return 0;
