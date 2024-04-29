@@ -122,6 +122,27 @@ void Vertex_array::draw_buffer(GLenum mode, size_t size){
 //           (just a prototype for now)               //
 /******************************************************/
 
+//FIXME: for now it's only floor and walls, but later add more objects and create a class to handle this.
+void Renderer::render_map
+(std::vector<std::vector<int>> map, 
+Vertex_array wall, Vertex_array floor, 
+Shader wall_sh, Texture wall_tx, Shader floor_sh, 
+Texture floor_tx, size_t len_indices)
+{
+
+   for (int j = 0; j != MAP_HEIGHT; j++){
+      for (int i = 0; i != MAP_WIDTH; i++){
+         if (map[j][i]) {
+            for (int k = 0; k < map[j][i]; k++){
+               this->add_object(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene", GL_TRIANGLES, &wall, &wall_sh, &wall_tx, 36, BUFFER);
+            }
+         } else {
+            this->add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &floor_sh, &floor_tx, len_indices, INDICES);
+         }
+      }
+   }
+}
+
 void Renderer::transform_object(std::string label, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Object obj){
    if (entities.find(label) == 0) utils::error("no object found", label);
    entities[label].pos = {model, view, projection};

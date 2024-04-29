@@ -196,6 +196,7 @@ class Renderer {
       std::vector<std::vector<int>> get_map(std::string filename);
       std::string get_map_string(std::string filename);
       int change_map(std::string filename, std::vector<std::vector<int>> map);
+      void render_map(std::vector<std::vector<int>> map, Vertex_array wall, Vertex_array floor, Shader wall_sh, Texture wall_tx, Shader floor_sh, Texture floor_tx, size_t len_indices);
 };
 
 

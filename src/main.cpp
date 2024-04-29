@@ -20,7 +20,7 @@
 int main(){
 // WINDOW: 
    GLFWwindow* win =  init_window(WIDTH, HEIGHT);
-glEnable(GL_DEPTH_TEST);
+   glEnable(GL_DEPTH_TEST);
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
@@ -49,9 +49,6 @@ glEnable(GL_DEPTH_TEST);
    Texture tx2 ("../textures/face.png", PNG, GL_REPEAT);
    Texture tx3 ("../textures/wall2.jpg", JPG, GL_REPEAT);
    Texture hand_texture ("../textures/hand.png", PNG, GL_CLAMP_TO_BORDER);
-
-
-// MAP (0 is empty, 1 is a block)
 
 
   
@@ -118,18 +115,7 @@ glEnable(GL_DEPTH_TEST);
  
    std::vector<std::vector<int>> map = renderer.get_map(FILENAME), map_input;
    map_input = map;
-   for (int j = 0; j != MAP_HEIGHT; j++){
-      for (int i = 0; i != MAP_WIDTH; i++){
-         if (map[j][i]) {
-            for (int k = 0; k < map[j][i]; k++){
-               renderer.add_object(std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene", GL_TRIANGLES, &cube2, &s2, &tx3, 36, BUFFER);
-            }
-         } else {
-            renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &s2, &tx, LEN(indices1), INDICES);
-         }
-      }
-   }
-
+   renderer.render_map(map, cube2, floor, s2, tx, s2, tx3, LEN(indices1));
    renderer.add_object("obj",   GL_TRIANGLES, &cube2, &s2, &tx, 36, BUFFER);
    renderer.add_object("light", GL_TRIANGLES, &cube,  &s5, nullptr, 36, BUFFER);
    bool target = true, move_light = false, hide_mouse = true;
@@ -140,7 +126,6 @@ glEnable(GL_DEPTH_TEST);
    glm::vec3 color = {0.8f, 0.8f, 0.8f};
 // MAIN LOOP:
    while(!glfwWindowShouldClose(win)){
-
       glfwPollEvents();
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -196,20 +181,7 @@ glEnable(GL_DEPTH_TEST);
             }
             if (ImGui::Button("save")){
                renderer.change_map(FILENAME, map_input);
-               //FIXME: rerender objects. delete objects?
-                for (int j = 0; j != MAP_HEIGHT; j++){
-                   for (int i = 0; i != MAP_WIDTH; i++){
-                      if (map_input[j][i]) {
-                         for (int k = 0; k < map_input[j][i]; k++){
-                            std::string obj_name = std::to_string(j) + std::to_string(i) + std::to_string(k) + " scene";
-                            if (renderer.object_exists(obj_name)) continue;
-                            renderer.add_object(obj_name, GL_TRIANGLES, &cube2, &s2, &tx3, 36, BUFFER);
-                          }
-                        } else {
-                           renderer.add_object(std::to_string(j) + std::to_string(i) + " floor", GL_TRIANGLES, &floor, &s2, &tx, LEN(indices1), INDICES);
-                        }
-                     }
-                  }
+               /* renderer.render_map(map_input, cube2, floor, s2, tx3, s2, tx, LEN(indices1)); */
             }
             ImGui::End();
          }
@@ -274,9 +246,6 @@ glEnable(GL_DEPTH_TEST);
       if (Input::is_pressed(win, GLFW_KEY_C)){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
          debug_console.draw(&tg, &cb, &fl, &mode, &fov, &cube_pos, camera.pos, &color); 
-         /* camera.pos = {2.0f, 9.0f, 2.0f}; */
-         /* camera.pitch = -90.0f; */
-         /* camera.yaw = -180.0f; */
          if (Input::is_pressed_mouse(win, GLFW_MOUSE_BUTTON_LEFT) && !count) {
             double x_pos, y_pos;
             glfwGetCursorPos(win, &x_pos, &y_pos);
@@ -286,7 +255,6 @@ glEnable(GL_DEPTH_TEST);
             count = 1;
          }
       } 
-      /* if (Input::is_pressed(win, GLFW_KEY_M)){ */
       else if (!debug_console.is_hovered() || !debug_console.is_clicked()){
          glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       }
